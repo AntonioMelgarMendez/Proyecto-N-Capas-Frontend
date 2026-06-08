@@ -5,6 +5,7 @@ import PropertyCatalog from '../features/catalog/pages/PropertyCatalog';
 import PropertyDetail from '../features/catalog/pages/PropertyDetail';
 import LandlordDashboard from '../features/landlord/pages/LandlordDashboard';
 import PropertyForm from '../features/landlord/pages/PropertyForm';
+import LandlordReviews from '../features/landlord/pages/LandlordReviews';
 
 const AppRoutes = () => {
   return (
@@ -20,6 +21,7 @@ const AppRoutes = () => {
         {/* Módulo 3 — Dashboard Arrendador */}
         <Route path="/landlord/properties" element={<LandlordDashboard />} />
         <Route path="/landlord/properties/:id" element={<PropertyForm />} />
+        <Route path="/landlord/reviews" element={<LandlordReviews />} />
 
         {/* Fallback wildcard to redirect undefined routes back to home */}
         <Route path="*" element={<Navigate to="/" replace />} />

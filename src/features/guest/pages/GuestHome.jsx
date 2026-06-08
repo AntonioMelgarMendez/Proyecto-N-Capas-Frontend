@@ -1,17 +1,19 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LayoutGrid, Search, Calendar, Key, Wrench } from 'lucide-react';
 import Sidebar from '../../../components/layout/Sidebar';
 import ReservationCard from '../components/ReservationCard';
 
 const GuestHome = () => {
+  const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const sidebarItems = [
-    { id: 'inicio', label: 'Inicio', icon: LayoutGrid, active: true, action: () => console.log('Inicio') },
-    { id: 'catalogo', label: 'Catálogo', icon: Search, action: () => console.log('Catálogo') },
-    { id: 'reservas', label: 'Mis Reservas', icon: Calendar, action: () => console.log('Mis Reservas') },
-    { id: 'llave', label: 'Mi Llave', icon: Key, action: () => console.log('Mi Llave') },
-    { id: 'mantenimiento', label: 'Mantenimiento', icon: Wrench, action: () => console.log('Mantenimiento') },
+    { id: 'inicio',         label: 'Inicio',         icon: LayoutGrid, active: true, action: () => navigate('/guest') },
+    { id: 'catalogo',       label: 'Catálogo',       icon: Search,     action: () => navigate('/tenant/catalog') },
+    { id: 'reservas',       label: 'Mis Reservas',   icon: Calendar,   action: () => navigate('/tenant/reservations') },
+    { id: 'llave',          label: 'Mi Llave',       icon: Key,        action: () => navigate('/tenant/key') },
+    { id: 'mantenimiento',  label: 'Mantenimiento',  icon: Wrench,     action: () => navigate('/tenant/maintenance') },
   ];
 
   return (
