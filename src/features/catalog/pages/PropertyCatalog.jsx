@@ -103,7 +103,7 @@ const PropertyCatalog = () => {
         </div>
 
         {/* Filter bar */}
-        <div className="rounded-xl border bg-white p-4 md:p-5 mb-6 shadow-sm">
+        <div className="rounded-xl  bg-white p-4 md:p-5 mb-6 shadow-sm">
           <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-[1fr_180px_240px_auto]">
             {/* Search */}
             <div className="relative">

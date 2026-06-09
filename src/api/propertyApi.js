@@ -1,4 +1,5 @@
-const BASE = 'http://localhost:8080/api';
+
+const BASE = import.meta.env.VITE_API_URL;
 const json = (r) => r.json();
 
 export const propertyApi = {
