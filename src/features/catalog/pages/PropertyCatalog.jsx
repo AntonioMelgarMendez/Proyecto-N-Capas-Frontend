@@ -85,13 +85,13 @@ const PropertyCatalog = () => {
         onToggle={() => setIsCollapsed(!isCollapsed)}
       />
 
-      <main className={`transition-all duration-300 p-6 md:p-8 ${isCollapsed ? 'ml-20' : 'ml-64'}`}>
+      <main className={`transition-all duration-300 p-4 sm:p-6 md:p-8 ml-0 pt-14 lg:pt-0 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
         {/* Header */}
         <div className="mb-6">
           <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">
             Catálogo
           </span>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight text-primary">
+          <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-primary">
             Encuentra tu próximo{' '}
             <span className="font-serif italic font-normal text-accent">hogar</span>
           </h1>
@@ -130,8 +130,8 @@ const PropertyCatalog = () => {
             </select>
 
             {/* Price range */}
-            <div className="flex items-center gap-3 rounded-md border border-slate-200 px-3 h-9">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 whitespace-nowrap">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 rounded-md border border-slate-200 px-3 py-2 sm:py-0 sm:h-9">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 sm:whitespace-nowrap">
                 ≤ ${maxPrice.toLocaleString()}
               </span>
               <input
@@ -149,7 +149,7 @@ const PropertyCatalog = () => {
             <button
               onClick={resetFilters}
               disabled={!hasActiveFilters}
-              className="h-9 px-4 rounded-md border border-slate-200 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+              className="h-9 px-4 rounded-md border border-slate-200 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center justify-center gap-1.5 w-full sm:w-auto disabled:opacity-40 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
             >
               <SlidersHorizontal className="h-3.5 w-3.5" />
               Limpiar

@@ -86,7 +86,7 @@ function Landing() {
       </div>
 
       {/* ── Right panel ────────────────────────────────────── */}
-      <div className="flex-1 flex items-center justify-center bg-white px-6 py-12">
+      <div className="flex-1 flex items-center justify-center bg-white px-4 py-8 sm:px-6 sm:py-12">
         <div className="w-full max-w-md">
 
           {/* Heading */}
@@ -105,7 +105,7 @@ function Landing() {
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-3">
                 Acceder como
               </p>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 min-[400px]:grid-cols-3 gap-3">
                 {ROLES.map(({ id, label, sub, icon: Icon }) => {
                   const active = role === id;
                   return (
@@ -113,7 +113,7 @@ function Landing() {
                       key={id}
                       type="button"
                       onClick={() => setRole(id)}
-                      className={`flex flex-col items-center gap-1.5 rounded-xl border py-4 px-2 transition-all ${
+                      className={`flex flex-col items-center gap-1.5 rounded-xl border py-3 px-3 min-[400px]:py-4 min-[400px]:px-2 transition-all ${
                         active
                           ? 'border-accent bg-amber-50/60 shadow-sm'
                           : 'border-slate-200 bg-white hover:border-slate-300'

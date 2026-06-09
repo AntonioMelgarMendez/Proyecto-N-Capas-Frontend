@@ -19,9 +19,9 @@ const GuestHome = () => {
   return (
     <div className="bg-bg-main min-h-screen">
       <Sidebar items={sidebarItems} role="INQUILINO" isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} />
-      <main className={`transition-all duration-300 p-8 bg-[radial-gradient(circle_at_top_left,_var(--tw-theme_bg_main),transparent)] ${isCollapsed ? 'ml-20' : 'ml-64'}`}>
+      <main className={`transition-all duration-300 p-4 sm:p-6 md:p-8 ml-0 pt-14 lg:pt-0 bg-[radial-gradient(circle_at_top_left,_var(--tw-theme_bg_main),transparent)] ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
         <header className="mb-10">
-          <h1 className="text-3xl font-bold text-primary">Bienvenido de nuevo</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary">Bienvenido de nuevo</h1>
           <p className="text-slate-500">Gestiona tus reservas y accede a servicios rápidos.</p>
         </header>
 
@@ -46,7 +46,7 @@ const GuestHome = () => {
           ))}
         </div>
 
-        <div className="mt-10 p-6 bg-gradient-to-r from-primary to-blue-900 rounded-3xl text-white shadow-lg">
+        <div className="mt-10 p-4 sm:p-6 bg-gradient-to-r from-primary to-blue-900 rounded-3xl text-white shadow-lg">
           <h3 className="font-bold mb-2">¿Necesitas ayuda técnica?</h3>
           <p className="text-sm opacity-80">Nuestro equipo está disponible 24/7 para asistirte con cualquier inconveniente de acceso.</p>
         </div>

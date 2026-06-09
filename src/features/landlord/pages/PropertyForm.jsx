@@ -182,7 +182,7 @@ const PropertyForm = () => {
     return (
       <div className="bg-bg-main min-h-screen">
         <Sidebar items={sidebarItems} role="PROPIETARIO" isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} />
-        <main className={`transition-all duration-300 p-6 md:p-8 ${isCollapsed ? 'ml-20' : 'ml-64'}`}>
+        <main className={`transition-all duration-300 p-4 sm:p-6 md:p-8 ml-0 pt-14 lg:pt-0 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
           <div className="animate-pulse max-w-5xl space-y-5">
             <div className="h-5 w-28 bg-slate-100 rounded" />
             <div className="h-9 w-64 bg-slate-100 rounded" />
@@ -213,7 +213,7 @@ const PropertyForm = () => {
         onToggle={() => setIsCollapsed(!isCollapsed)}
       />
 
-      <main className={`transition-all duration-300 p-6 md:p-8 ${isCollapsed ? 'ml-20' : 'ml-64'}`}>
+      <main className={`transition-all duration-300 p-4 sm:p-6 md:p-8 ml-0 pt-14 lg:pt-0 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
         <div className="max-w-5xl space-y-6">
 
           {/* Header */}
@@ -227,7 +227,7 @@ const PropertyForm = () => {
             </Link>
             <div className="mt-3">
               <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">Catálogo</span>
-              <h1 className="mt-1 text-3xl font-bold tracking-tight text-primary">
+              <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-primary">
                 {isNew ? 'Nueva' : 'Editar'}{' '}
                 <span className="font-serif italic font-normal text-accent">propiedad</span>
               </h1>
@@ -281,7 +281,7 @@ const PropertyForm = () => {
                   />
                 </Field>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field label="Ciudad" required>
                     <input
                       name="city"
@@ -329,7 +329,7 @@ const PropertyForm = () => {
                   </p>
                 </Field>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <Field label="Habitaciones" required>
                     <input
                       name="bedrooms"
@@ -486,7 +486,7 @@ const PropertyForm = () => {
               )}
 
               {/* Actions */}
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Link
                   to="/landlord/properties"
                   className="flex-1 h-10 rounded-md border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition flex items-center justify-center"

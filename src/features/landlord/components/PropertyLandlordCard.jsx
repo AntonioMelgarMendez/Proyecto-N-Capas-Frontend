@@ -117,7 +117,7 @@ const PropertyLandlordCard = ({ property, onDelete }) => {
             />
           </div>
         </div>
-        <div className="mt-auto flex gap-2">
+        <div className="mt-auto flex flex-col min-[480px]:flex-row gap-2">
           <Link
             to={`/landlord/properties/${id}`}
             className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[#091124] py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#131f3b]"
@@ -127,7 +127,7 @@ const PropertyLandlordCard = ({ property, onDelete }) => {
           </Link>
           <Link
             to={`/tenant/property/${id}`}
-            className="flex items-center justify-center px-4 rounded-xl border border-slate-200 bg-white text-sm font-medium text-[#091124] transition-colors hover:bg-slate-50 shadow-sm"
+            className="flex-1 min-[480px]:flex-none flex items-center justify-center px-4 rounded-xl border border-slate-200 bg-white text-sm font-medium text-[#091124] transition-colors hover:bg-slate-50 shadow-sm"
           >
             Vista pública
           </Link>

@@ -6,3 +6,11 @@
   --color-bg-main: #F8FAFE;
   --color-bg-card: #ffffff;
 }
+
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

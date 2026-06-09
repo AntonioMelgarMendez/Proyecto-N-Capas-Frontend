@@ -59,7 +59,7 @@ const PropertyCard = ({ property }) => {
             <span className="line-clamp-1">{city}, {country}</span>
           </div>
 
-          <div className="flex items-center gap-4 mt-4 text-[15px] text-slate-500 font-medium">
+          <div className="flex flex-wrap items-center gap-4 mt-4 text-[15px] text-slate-500 font-medium">
             <span className="flex items-center gap-1.5">
               <BedDouble className="h-[18px] w-[18px] text-slate-400" strokeWidth={1.5} />
               {bedrooms}
