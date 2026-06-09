@@ -66,13 +66,13 @@ const LandlordDashboard = () => {
         onToggle={() => setIsCollapsed(!isCollapsed)}
       />
 
-      <main className={`transition-all duration-300 p-6 md:p-8 ${isCollapsed ? 'ml-20' : 'ml-64'}`}>
+      <main className={`transition-all duration-300 p-4 sm:p-6 md:p-8 ml-0 pt-14 lg:pt-0 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
 
         {/* Header */}
         <div className="flex flex-wrap items-end justify-between gap-3 mb-6">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">Catálogo</span>
-            <h1 className="mt-1 text-3xl font-bold tracking-tight text-primary">
+            <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-primary">
               Mis <span className="font-serif italic font-normal text-accent">propiedades</span>
             </h1>
             <p className="mt-1 text-sm text-slate-500">
@@ -81,7 +81,7 @@ const LandlordDashboard = () => {
           </div>
           <Link
             to="/landlord/properties/new"
-            className="inline-flex items-center gap-2 h-9 px-4 rounded-md bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm"
+            className="inline-flex items-center justify-center gap-2 h-9 px-4 rounded-md bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm w-full sm:w-auto"
           >
             <Plus className="h-4 w-4" />
             Nueva propiedad
@@ -137,7 +137,7 @@ const LandlordDashboard = () => {
       {/* Delete confirmation modal */}
       {confirmDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4 max-h-[90vh] overflow-y-auto">
             <h3 className="text-base font-bold text-primary">¿Eliminar propiedad?</h3>
             <p className="text-sm text-slate-500 mt-2">
               Se eliminará <span className="font-semibold text-primary">"{confirmDelete.title}"</span> permanentemente. Esta acción no se puede deshacer.

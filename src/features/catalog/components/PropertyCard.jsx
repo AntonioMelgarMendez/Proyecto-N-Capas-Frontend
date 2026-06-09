@@ -14,82 +14,79 @@ const PropertyCard = ({ property }) => {
   const { id, title, city, country, pricePerNight, bedrooms, bathrooms, maxGuests, averageRating, isAvailable } = property;
 
   const img = IMAGES[Number(id) % IMAGES.length];
-  const rating = averageRating ? parseFloat(averageRating).toFixed(1) : null;
   const price = parseFloat(pricePerNight).toLocaleString('en-US', { minimumFractionDigits: 0 });
+  const hasRating = averageRating != null && averageRating > 0;
+  const rating = hasRating ? parseFloat(averageRating).toFixed(1) : 'Nuevo';
 
   return (
     <Link
       to={`/tenant/property/${id}`}
-      className="group overflow-hidden rounded-2xl border bg-white shadow-sm transition-all hover:shadow-xl hover:-translate-y-0.5 block"
+      className="group flex flex-col overflow-hidden rounded-[20px] bg-white border border-slate-200 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1"
     >
-      {/* Photo */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100">
         <img
           src={img}
           alt={title}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent" />
-
-        {/* Type badge — top left */}
-        <div className="absolute top-3 left-3">
-          <span className="bg-white text-primary text-xs font-semibold px-2.5 py-0.5 rounded-md shadow-sm">
-            {bedrooms} hab.
+        <div className="absolute top-4 left-4 bg-white px-3 py-1.5 rounded-full text-xs font-bold text-[#091124] shadow-sm">
+          {bedrooms} Hab.
+        </div>
+        <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-full text-xs font-bold text-[#091124] shadow-sm">
+          <Star 
+            className={`h-4 w-4 ${hasRating ? 'fill-amber-400 text-amber-400' : 'fill-slate-300 text-slate-300'}`} 
+          />
+          <span className={hasRating ? 'text-[#091124]' : 'text-slate-400'}>
+            {rating}
           </span>
         </div>
 
-        {/* Rating chip — top right */}
-        {rating && (
-          <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-primary backdrop-blur-sm">
-            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-            {rating}
-          </div>
-        )}
-
-        {/* Unavailable overlay */}
         {isAvailable === false && (
-          <div className="absolute inset-0 bg-slate-900/30 flex items-center justify-center">
-            <span className="bg-white/90 text-slate-700 text-xs font-semibold px-3 py-1 rounded-full">
+          <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center">
+            <span className="bg-[#091124] text-white text-sm font-bold px-5 py-2 rounded-full shadow-lg">
               No disponible
             </span>
           </div>
         )}
       </div>
-
-      {/* Body */}
-      <div className="p-4 space-y-3">
+      <div className="p-5 flex flex-col flex-1 justify-between gap-5">
+        
         <div>
-          <h3 className="font-bold text-primary text-base leading-tight line-clamp-1">{title}</h3>
-          <div className="flex items-center gap-1 mt-1 text-slate-500 text-xs">
-            <MapPin className="h-3 w-3 flex-shrink-0" />
-            <span>{city}, {country}</span>
+          <h3 className="text-[22px] font-extrabold text-[#091124] line-clamp-1 leading-tight tracking-tight">{title}</h3>
+          
+          <div className="flex items-center gap-1.5 mt-2 text-slate-500 text-sm font-medium">
+            <MapPin className="h-4 w-4 flex-shrink-0" />
+            <span className="line-clamp-1">{city}, {country}</span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 mt-4 text-[15px] text-slate-500 font-medium">
+            <span className="flex items-center gap-1.5">
+              <BedDouble className="h-[18px] w-[18px] text-slate-400" strokeWidth={1.5} />
+              {bedrooms}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Bath className="h-[18px] w-[18px] text-slate-400" strokeWidth={1.5} />
+              {bathrooms}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Users className="h-[18px] w-[18px] text-slate-400" strokeWidth={1.5} />
+              {maxGuests}
+            </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 text-xs text-slate-500">
-          <span className="flex items-center gap-1">
-            <BedDouble className="h-3.5 w-3.5" />
-            {bedrooms} cama{bedrooms !== 1 ? 's' : ''}
-          </span>
-          <span className="text-slate-300">·</span>
-          <span className="flex items-center gap-1">
-            <Bath className="h-3.5 w-3.5" />
-            {bathrooms} baño{bathrooms !== 1 ? 's' : ''}
-          </span>
-          <span className="text-slate-300">·</span>
-          <span className="flex items-center gap-1">
-            <Users className="h-3.5 w-3.5" />
-            {maxGuests} huésp.
-          </span>
-        </div>
-
-        <div className="flex items-baseline justify-between border-t border-slate-100 pt-3">
+        <div className="border-t border-slate-100 pt-4 flex justify-between items-end">
           <div>
-            <span className="text-xl font-bold text-primary">${price}</span>
-            <span className="text-[10px] text-slate-400 uppercase tracking-wide ml-1">/ noche</span>
+            <span className="text-3xl font-extrabold text-[#091124] tracking-tight">${price}</span>
+            <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+              Por noche
+            </span>
           </div>
-          <span className="text-xs font-semibold text-accent">Ver detalle →</span>
+          <span className="text-sm font-bold text-amber-500 transition-colors group-hover:text-amber-600 mb-1">
+            Ver detalle &rarr;
+          </span>
         </div>
+
       </div>
     </Link>
   );

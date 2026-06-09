@@ -89,13 +89,13 @@ const LandlordReviews = () => {
         onToggle={() => setIsCollapsed(!isCollapsed)}
       />
 
-      <main className={`transition-all duration-300 p-6 md:p-8 ${isCollapsed ? 'ml-20' : 'ml-64'}`}>
+      <main className={`transition-all duration-300 p-4 sm:p-6 md:p-8 ml-0 pt-14 lg:pt-0 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
         <div className="max-w-5xl space-y-6">
 
           {/* Header */}
           <div>
             <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">Reputación</span>
-            <h1 className="mt-1 text-3xl font-bold tracking-tight text-primary">
+            <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-primary">
               Mis <span className="font-serif italic font-normal text-accent">reseñas</span>
             </h1>
             <p className="mt-1 text-sm text-slate-500">
@@ -110,9 +110,9 @@ const LandlordReviews = () => {
             <div className="grid gap-5 lg:grid-cols-[260px_1fr]">
 
               {/* Rating summary card */}
-              <div className="rounded-xl bg-white border border-slate-100 shadow-sm p-6 flex gap-6 items-center">
+              <div className="rounded-xl bg-white border border-slate-100 shadow-sm p-6 flex flex-col sm:flex-row gap-4 sm:gap-6 items-center sm:items-start">
                 <div className="text-center shrink-0">
-                  <p className="text-5xl font-bold text-primary leading-none">{avg}</p>
+                  <p className="text-4xl sm:text-5xl font-bold text-primary leading-none">{avg}</p>
                   <div className="flex justify-center gap-0.5 mt-2">
                     {[1, 2, 3, 4, 5].map((s) => (
                       <Star

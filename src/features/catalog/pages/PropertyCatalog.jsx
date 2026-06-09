@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Search, SlidersHorizontal, LayoutGrid, Calendar, Key, Wrench } from 'lucide-react';
@@ -6,7 +6,7 @@ import Sidebar from '../../../components/layout/Sidebar';
 import PropertyCard from '../components/PropertyCard';
 import { propertyApi } from '../../../api/propertyApi';
 
-const MAX_PRICE = 5000;
+const DEFAULT_PRICE_CEILING = 5000;
 
 const SkeletonCard = () => (
   <div className="rounded-2xl border bg-white overflow-hidden animate-pulse">
@@ -33,7 +33,7 @@ const PropertyCatalog = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
-  const [maxPrice, setMaxPrice] = useState(MAX_PRICE);
+  const [maxPrice, setMaxPrice] = useState(null);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['properties', 'available'],
@@ -45,6 +45,21 @@ const PropertyCatalog = () => {
 
   const properties = data ?? [];
 
+  const priceCeiling = useMemo(() => {
+    const prices = properties.map((p) => parseFloat(p.pricePerNight) || 0);
+    if (!prices.length) return DEFAULT_PRICE_CEILING;
+    const highest = Math.max(...prices);
+    return Math.max(DEFAULT_PRICE_CEILING, Math.ceil(highest / 100) * 100);
+  }, [properties]);
+
+  const effectiveMaxPrice = maxPrice ?? priceCeiling;
+
+  useEffect(() => {
+    if (maxPrice !== null && maxPrice > priceCeiling) {
+      setMaxPrice(priceCeiling);
+    }
+  }, [maxPrice, priceCeiling]);
+
   const cities = useMemo(
     () => [...new Set(properties.map((p) => p.city))].filter(Boolean).sort(),
     [properties],
@@ -55,17 +70,17 @@ const PropertyCatalog = () => {
     return properties.filter((p) => {
       const matchSearch = !q || p.title?.toLowerCase().includes(q) || p.city?.toLowerCase().includes(q);
       const matchCity = !selectedCity || p.city === selectedCity;
-      const matchPrice = parseFloat(p.pricePerNight) <= maxPrice;
+      const matchPrice = parseFloat(p.pricePerNight) <= effectiveMaxPrice;
       return matchSearch && matchCity && matchPrice;
     });
-  }, [properties, search, selectedCity, maxPrice]);
+  }, [properties, search, selectedCity, effectiveMaxPrice]);
 
-  const hasActiveFilters = search || selectedCity || maxPrice < MAX_PRICE;
+  const hasActiveFilters = search || selectedCity || maxPrice !== null;
 
   const resetFilters = () => {
     setSearch('');
     setSelectedCity('');
-    setMaxPrice(MAX_PRICE);
+    setMaxPrice(null);
   };
 
   const sidebarItems = [
@@ -85,13 +100,13 @@ const PropertyCatalog = () => {
         onToggle={() => setIsCollapsed(!isCollapsed)}
       />
 
-      <main className={`transition-all duration-300 p-6 md:p-8 ${isCollapsed ? 'ml-20' : 'ml-64'}`}>
+      <main className={`transition-all duration-300 p-4 sm:p-6 md:p-8 ml-0 pt-14 lg:pt-0 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
         {/* Header */}
         <div className="mb-6">
           <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">
             Catálogo
           </span>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight text-primary">
+          <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-primary">
             Encuentra tu próximo{' '}
             <span className="font-serif italic font-normal text-accent">hogar</span>
           </h1>
@@ -103,7 +118,7 @@ const PropertyCatalog = () => {
         </div>
 
         {/* Filter bar */}
-        <div className="rounded-xl border bg-white p-4 md:p-5 mb-6 shadow-sm">
+        <div className="rounded-xl  bg-white p-4 md:p-5 mb-6 shadow-sm">
           <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-[1fr_180px_240px_auto]">
             {/* Search */}
             <div className="relative">
@@ -130,16 +145,16 @@ const PropertyCatalog = () => {
             </select>
 
             {/* Price range */}
-            <div className="flex items-center gap-3 rounded-md border border-slate-200 px-3 h-9">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 whitespace-nowrap">
-                ≤ ${maxPrice.toLocaleString()}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 rounded-md border border-slate-200 px-3 py-2 sm:py-0 sm:h-9">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 sm:whitespace-nowrap">
+                ≤ ${effectiveMaxPrice.toLocaleString()}
               </span>
               <input
                 type="range"
                 min={0}
-                max={MAX_PRICE}
+                max={priceCeiling}
                 step={50}
-                value={maxPrice}
+                value={effectiveMaxPrice}
                 onChange={(e) => setMaxPrice(Number(e.target.value))}
                 className="flex-1 accent-primary cursor-pointer"
               />
@@ -149,7 +164,7 @@ const PropertyCatalog = () => {
             <button
               onClick={resetFilters}
               disabled={!hasActiveFilters}
-              className="h-9 px-4 rounded-md border border-slate-200 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+              className="h-9 px-4 rounded-md border border-slate-200 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center justify-center gap-1.5 w-full sm:w-auto disabled:opacity-40 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
             >
               <SlidersHorizontal className="h-3.5 w-3.5" />
               Limpiar

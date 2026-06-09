@@ -2,7 +2,7 @@ import { Calendar, MapPin, Clock } from 'lucide-react';
 
 const ReservationCard = ({ title, date, location, status }) => {
   return (
-    <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm hover:shadow-md transition-all duration-300">
+    <div className="bg-white border border-slate-200 p-4 sm:p-6 rounded-3xl shadow-sm hover:shadow-md transition-all duration-300">
       <div className="flex justify-between items-start mb-4">
         <div className="p-2 bg-blue-50 rounded-lg">
           <Calendar className="text-primary" size={20} />
