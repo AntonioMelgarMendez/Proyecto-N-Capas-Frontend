@@ -15,10 +15,12 @@ const AppRoutes = () => {
         <Route path="/guest" element={<GuestHome />} />
 
         {/* Módulo 3 — Catálogo (Inquilino) */}
+        <Route path="/tenant" element={<Navigate to="/guest" replace />} />
         <Route path="/tenant/catalog" element={<PropertyCatalog />} />
         <Route path="/tenant/property/:id" element={<PropertyDetail />} />
 
         {/* Módulo 3 — Dashboard Arrendador */}
+        <Route path="/landlord" element={<Navigate to="/landlord/properties" replace />} />
         <Route path="/landlord/properties" element={<LandlordDashboard />} />
         <Route path="/landlord/properties/:id" element={<PropertyForm />} />
         <Route path="/landlord/reviews" element={<LandlordReviews />} />
