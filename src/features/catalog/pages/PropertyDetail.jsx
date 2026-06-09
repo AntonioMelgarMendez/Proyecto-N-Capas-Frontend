@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   ArrowLeft, MapPin, BedDouble, Bath, Users, Star,
   ShieldCheck, LayoutGrid, Search, Calendar, Key, Wrench,
@@ -11,6 +11,9 @@ import ReviewCard from '../components/ReviewCard';
 import { propertyApi } from '../../../api/propertyApi';
 import { reviewApi } from '../../../api/reviewApi';
 import { today, addMonths, calcBooking, DURATIONS } from '../utils/booking';
+import { reservationApi } from '../../../api/reservationApi';
+import { MOCK_TENANT_ID } from '../../checkout/constants';
+import { saveCheckoutContext } from '../../checkout/utils/checkoutContext';
 
 const PropertyDetail = () => {
   const { id } = useParams();
@@ -54,11 +57,47 @@ const PropertyDetail = () => {
   const pricePerNight = parseFloat(property?.pricePerNight ?? 0);
   const { nights, subtotal, cleaning, serviceFee, total } = calcBooking({ pricePerNight, checkIn, checkOut });
 
-  const handleReserve = () => {
-    navigate(`/tenant/property/${id}/reserve`, {
-      state: { checkIn, checkOut, duration, nights, subtotal, cleaning, serviceFee, total, pricePerNight },
-    });
-  };
+  const createReservation = useMutation({
+    mutationFn: () =>
+      reservationApi.book(Number(id), {
+        propertyId: Number(id),
+        tenantId: MOCK_TENANT_ID,
+        checkInDate: checkIn,
+        checkOutDate: checkOut,
+        numberOfGuests: 1,
+        totalAmount: total,
+        includeCleaning: true,
+        includeInsurance: false,
+      }),
+    onSuccess: (res) => {
+      const booking = res?.data ?? res;
+      const newId = booking?.id;
+      if (!newId) return;
+
+      const context = {
+        propertyId: Number(id),
+        propertyTitle: property?.title,
+        address: property?.address,
+        city: property?.city,
+        country: property?.country,
+        checkIn: booking.checkInDate ?? checkIn,
+        checkOut: booking.checkOutDate ?? checkOut,
+        duration,
+        subtotal,
+        cleaning,
+        serviceFee,
+        totalAmount: booking.totalAmount ?? total,
+        monthlyPrice: Math.round(pricePerNight * 30),
+        numberOfGuests: booking.numberOfGuests ?? 1,
+        status: booking.status,
+      };
+
+      saveCheckoutContext(newId, context);
+      navigate(`/tenant/checkout/${newId}`, { state: context });
+    },
+  });
+
+  const handleReserve = () => createReservation.mutate();
 
   /* ── Sidebar ─────────────────────────────────────────── */
   const sidebarItems = [
@@ -314,9 +353,10 @@ const PropertyDetail = () => {
                   <button
                     type="button"
                     onClick={handleReserve}
-                    className="w-full min-h-[52px] rounded-xl bg-primary text-white text-base font-semibold hover:bg-primary/90 transition-colors shadow-md py-3"
+                    disabled={createReservation.isPending}
+                    className="w-full min-h-[52px] rounded-xl bg-primary text-white text-base font-semibold hover:bg-primary/90 transition-colors shadow-md py-3 disabled:opacity-50"
                   >
-                    Reservar ahora
+                    {createReservation.isPending ? 'Creando reserva...' : 'Reservar ahora'}
                   </button>
 
                   <p className="text-center text-xs text-slate-400 flex items-center justify-center gap-1">
