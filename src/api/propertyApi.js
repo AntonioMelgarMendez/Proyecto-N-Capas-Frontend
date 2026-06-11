@@ -3,11 +3,11 @@ const BASE = import.meta.env.VITE_API_URL;
 const json = (r) => r.json();
 
 export const propertyApi = {
-  getAll:        ()     => fetch(`${BASE}/properties`).then(json),
-  getAvailable:  ()     => fetch(`${BASE}/properties/available`).then(json),
-  getById:       (id)   => fetch(`${BASE}/properties/${id}`).then(json),
-  getByLandlord: (id)   => fetch(`${BASE}/properties/landlord/${id}`).then(json),
-  getByCity:     (city) => fetch(`${BASE}/properties/city/${encodeURIComponent(city)}`).then(json),
+  getAll: () => fetch(`${BASE}/properties`).then(json),
+  getAvailable: () => fetch(`${BASE}/properties/available`).then(json),
+  getById: (id) => fetch(`${BASE}/properties/${id}`).then(json),
+  getByLandlord: (id) => fetch(`${BASE}/properties/landlord/${id}`).then(json),
+  getByCity: (city) => fetch(`${BASE}/properties/city/${encodeURIComponent(city)}`).then(json),
 
   create: (data) =>
     fetch(`${BASE}/properties`, {
@@ -42,6 +42,6 @@ export const propertyApi = {
     }).then(json);
   },
 
-  getPhotos:   (propertyId) => fetch(`${BASE}/properties/${propertyId}/photos`).then(json),
-  deletePhoto: (photoId)    => fetch(`${BASE}/properties/photos/${photoId}`, { method: 'DELETE' }).then(json),
+  getPhotos: (propertyId) => fetch(`${BASE}/properties/${propertyId}/photos`).then(json),
+  deletePhoto: (photoId) => fetch(`${BASE}/properties/photos/${photoId}`, { method: 'DELETE' }).then(json),
 };

@@ -10,5 +10,5 @@ export const reviewApi = {
     }).then(json),
 
   getByProperty: (propertyId) => fetch(`${BASE}/reviews/property/${propertyId}`).then(json),
-  getByUser:     (userId)     => fetch(`${BASE}/reviews/user/${userId}`).then(json),
+  getByUser: (userId) => fetch(`${BASE}/reviews/user/${userId}`).then(json),
 };
