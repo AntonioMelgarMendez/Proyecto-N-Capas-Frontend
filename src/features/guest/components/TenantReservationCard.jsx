@@ -1,14 +1,24 @@
-import { MapPin, CalendarCheck2, FileText, Key, Calendar, XCircle } from 'lucide-react';
+import { MapPin, CalendarCheck2, FileText, Key, Calendar, XCircle, CreditCard, Ban } from 'lucide-react';
 import IconButton from '../../../components/ui/IconButton';
+import { getExtensionStatusLabel, getExtensionStatusClasses, getActiveExtensionRequest } from '../constants/extensionStatus';
 
 const TenantReservationCard = ({
   res,
+  extensionRequests = [],
   isPinVisible,
   onTogglePin,
   onExtend,
   onCancel,
   onDownloadContract,
+  onCompletePayment,
+  onCancelCheckout,
+  onPayExtension,
+  isPaymentPending,
+  isCancelCheckoutPending,
+  isPayExtensionPending,
 }) => {
+  const activeExtension = getActiveExtensionRequest(extensionRequests);
+
   const getStatusLabelAndColors = (status) => {
     switch (status) {
       case 'CONFIRMED':
@@ -20,7 +30,8 @@ const TenantReservationCard = ({
       case 'COMPLETED':
         return { label: 'Finalizada', bg: 'bg-slate-50 text-slate-600 border border-slate-100', dot: 'bg-slate-500' };
       case 'CANCELLED':
-        return { label: 'Cancelada', bg: 'bg-rose-50 text-rose-600 border border-rose-100', dot: 'bg-rose-500' };
+      case 'EXPIRED':
+        return { label: status === 'EXPIRED' ? 'Expirada' : 'Cancelada', bg: 'bg-rose-50 text-rose-600 border border-rose-100', dot: 'bg-rose-500' };
       default:
         return { label: status, bg: 'bg-slate-50 text-slate-600 border border-slate-100', dot: 'bg-slate-500' };
     }
@@ -39,7 +50,6 @@ const TenantReservationCard = ({
 
   return (
     <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 grid grid-cols-1 md:grid-cols-[220px_1fr] lg:grid-cols-[240px_1fr]">
-      {/* Image Area */}
       <div className="relative h-48 md:h-full w-full bg-slate-100 min-h-[160px]">
         <img
           src={res.propertyCoverPhoto || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80'}
@@ -50,16 +60,19 @@ const TenantReservationCard = ({
           <span className={`w-1.5 h-1.5 rounded-full ${statusMeta.dot}`} />
           {statusMeta.label}
         </span>
+        {activeExtension && (
+          <span className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold border shadow-sm ${getExtensionStatusClasses(activeExtension.status)}`}>
+            {getExtensionStatusLabel(activeExtension.status)}
+          </span>
+        )}
       </div>
 
-      {/* Information and Actions */}
       <div className="p-6 flex flex-col justify-between gap-4">
         <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
-          {/* Info details */}
           <div className="space-y-2">
             <span className="text-[10px] font-bold text-slate-400 tracking-wider">R-{res.id}</span>
             <h2 className="text-xl font-extrabold text-[#091124] tracking-tight">{res.propertyTitle}</h2>
-            
+
             <div className="flex items-center gap-1.5 text-xs text-slate-500">
               <MapPin className="h-3.5 w-3.5 text-slate-400" />
               <span>{res.propertyCity}</span>
@@ -87,7 +100,6 @@ const TenantReservationCard = ({
             </div>
           </div>
 
-          {/* Price Area */}
           <div className="text-left lg:text-right shrink-0">
             <p className="text-2xl font-black text-[#091124]">${res.totalAmount.toLocaleString()}</p>
             <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
@@ -98,18 +110,55 @@ const TenantReservationCard = ({
 
         <hr className="border-slate-100" />
 
-        {/* Buttons Action Bar */}
         <div className="flex flex-wrap items-center gap-2">
-          {(res.status === 'CONFIRMED' || res.status === 'CHECKED_IN') && (
-            <IconButton
-              icon={Calendar}
-              onClick={() => onExtend(res)}
-              variant="primary"
-              iconSize={14}
-            >
-              Extender estancia
-            </IconButton>
+          {res.status === 'PENDING_PAYMENT' && (
+            <>
+              <IconButton
+                icon={CreditCard}
+                onClick={() => onCompletePayment(res.id)}
+                variant="primary"
+                iconSize={14}
+                disabled={isPaymentPending}
+              >
+                {isPaymentPending ? 'Redirigiendo...' : 'Completar pago'}
+              </IconButton>
+              <IconButton
+                icon={Ban}
+                onClick={() => onCancelCheckout(res.id)}
+                variant="danger-outline"
+                iconSize={14}
+                disabled={isCancelCheckoutPending}
+              >
+                Cancelar checkout
+              </IconButton>
+            </>
           )}
+
+          {(res.status === 'CONFIRMED' || res.status === 'CHECKED_IN') && (
+            <>
+              <IconButton
+                icon={Calendar}
+                onClick={() => onExtend(res)}
+                variant="primary"
+                iconSize={14}
+                disabled={!!activeExtension && activeExtension.status === 'PENDING'}
+              >
+                Extender estancia
+              </IconButton>
+              {activeExtension?.status === 'APPROVED' && (
+                <IconButton
+                  icon={CreditCard}
+                  onClick={() => onPayExtension(activeExtension.id)}
+                  variant="primary"
+                  iconSize={14}
+                  disabled={isPayExtensionPending}
+                >
+                  Pagar extensión
+                </IconButton>
+              )}
+            </>
+          )}
+
           {(res.status === 'CONFIRMED' || res.status === 'PENDING' || res.status === 'PENDING_PAYMENT') && (
             <IconButton
               icon={XCircle}
@@ -120,6 +169,7 @@ const TenantReservationCard = ({
               Cancelar
             </IconButton>
           )}
+
           {res.status === 'CONFIRMED' && (
             <IconButton
               icon={Key}
@@ -130,6 +180,7 @@ const TenantReservationCard = ({
               {isPinVisible ? 'Ocultar PIN' : 'Ver PIN'}
             </IconButton>
           )}
+
           <IconButton
             icon={FileText}
             onClick={() => onDownloadContract(res)}

@@ -6,8 +6,7 @@ import Sidebar from '../../../components/layout/Sidebar';
 import ReviewCard from '../../catalog/components/ReviewCard';
 import { propertyApi } from '../../../api/propertyApi';
 import { reviewApi } from '../../../api/reviewApi';
-
-const MOCK_LANDLORD_ID = 1;
+import { useLandlordSidebar, MOCK_LANDLORD_ID } from '../hooks/useLandlordSidebar';
 
 const RatingBar = ({ star, count, total }) => {
   const pct = total > 0 ? Math.round((count / total) * 100) : 0;
@@ -25,7 +24,7 @@ const RatingBar = ({ star, count, total }) => {
 
 const LandlordReviews = () => {
   const navigate = useNavigate();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const sidebar = useLandlordSidebar();
   const [filterPropId, setFilterPropId] = useState('all');
 
   /* ── Fetch properties ───────────────────────────────────── */
@@ -71,25 +70,16 @@ const LandlordReviews = () => {
 
   const isLoading = propsLoading || reviewQueries.some((q) => q.isLoading);
 
-  /* ── Sidebar ────────────────────────────────────────────── */
-  const sidebarItems = [
-    { id: 'dashboard',     label: 'Dashboard',       icon: LayoutGrid, action: () => navigate('/landlord') },
-    { id: 'propiedades',   label: 'Mis Propiedades', icon: House,      action: () => navigate('/landlord/properties') },
-    { id: 'solicitudes',   label: 'Solicitudes',     icon: Inbox,      action: () => navigate('/landlord/requests') },
-    { id: 'mantenimiento', label: 'Mantenimiento',   icon: Wrench,     action: () => navigate('/landlord/tickets') },
-    { id: 'reviews',       label: 'Reseñas',         icon: Star, active: true, action: () => {} },
-  ];
-
   return (
     <div className="bg-bg-main min-h-screen">
       <Sidebar
-        items={sidebarItems}
+        items={sidebar.items}
         role="PROPIETARIO"
-        isCollapsed={isCollapsed}
-        onToggle={() => setIsCollapsed(!isCollapsed)}
+        isCollapsed={sidebar.isCollapsed}
+        onToggle={() => sidebar.setIsCollapsed(!sidebar.isCollapsed)}
       />
 
-      <main className={`transition-all duration-300 p-4 sm:p-6 md:p-8 ml-0 pt-14 lg:pt-0 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
+      <main className={sidebar.mainClass(sidebar.isCollapsed)}>
         <div className="max-w-5xl space-y-6">
 
           {/* Header */}
