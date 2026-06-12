@@ -14,7 +14,9 @@ import { loadCheckoutContext } from '../utils/checkoutContext';
 const PaymentSuccessPage = () => {
   const [searchParams] = useSearchParams();
   const reservationId = searchParams.get('reservationId');
+  const extensionRequestId = searchParams.get('extensionRequestId');
   const sessionId = searchParams.get('session_id');
+  const isExtensionPayment = !!extensionRequestId;
   const sidebar = useTenantSidebar();
   const checkoutContext = loadCheckoutContext(reservationId);
 
@@ -28,12 +30,14 @@ const PaymentSuccessPage = () => {
     needsSignature,
     signMutation,
     isLoading: contractLoading,
-  } = useContract(reservationId, isPaid);
+  } = useContract(reservationId, isPaid && !isExtensionPayment);
 
   const isContractSigned = !!contract;
   const signError = signMutation.error?.message;
 
-  const activeStep = isContractSigned ? 3 : isPaid ? 2 : 1;
+  const activeStep = isExtensionPayment
+    ? (isPaid ? 3 : 1)
+    : (isContractSigned ? 3 : isPaid ? 2 : 1);
 
   const handleSign = (termsAccepted) => signMutation.mutate(termsAccepted);
 
@@ -67,7 +71,32 @@ const PaymentSuccessPage = () => {
 
           <CheckoutStepper activeStep={activeStep} />
 
-          {isPaymentPending && !isPaid && (
+          {isExtensionPayment && isPaymentPending && !isPaid && (
+            <div className="rounded-2xl border border-slate-200 bg-white p-8 sm:p-12 shadow-sm mt-4">
+              <Loader2 className="h-14 w-14 text-accent animate-spin mx-auto mb-6" />
+              <h1 className="text-2xl font-bold text-primary mb-2">Procesando pago de extensión...</h1>
+              <p className="text-sm text-slate-500">Confirmando tu pago con Stripe.</p>
+            </div>
+          )}
+
+          {isExtensionPayment && isPaid && (
+            <div className="rounded-2xl border border-slate-200 bg-white p-8 sm:p-12 shadow-sm mt-4">
+              <CheckCircle className="h-14 w-14 text-emerald-500 mx-auto mb-6" />
+              <h1 className="text-2xl font-bold text-primary mb-2">Extensión pagada</h1>
+              <p className="text-sm text-slate-500 mb-6">
+                La solicitud #{extensionRequestId} fue pagada. Tu check-out en la reserva #{reservationId} ha sido extendido.
+              </p>
+              <Link
+                to="/tenant/reservations"
+                className="inline-flex items-center justify-center gap-2 min-h-[48px] px-8 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                Ver mis reservas
+              </Link>
+            </div>
+          )}
+
+          {!isExtensionPayment && isPaymentPending && !isPaid && (
             <div className="rounded-2xl border border-slate-200 bg-white p-8 sm:p-12 shadow-sm mt-4">
               <Loader2 className="h-14 w-14 text-accent animate-spin mx-auto mb-6" />
               <h1 className="text-2xl font-bold text-primary mb-2">Procesando pago...</h1>
@@ -77,7 +106,7 @@ const PaymentSuccessPage = () => {
             </div>
           )}
 
-          {isPaid && contractLoading && (
+          {!isExtensionPayment && isPaid && contractLoading && (
             <div className="rounded-2xl border border-slate-200 bg-white p-8 sm:p-12 shadow-sm mt-4">
               <Loader2 className="h-14 w-14 text-accent animate-spin mx-auto mb-6" />
               <h1 className="text-2xl font-bold text-primary mb-2">Pago confirmado</h1>
@@ -85,7 +114,7 @@ const PaymentSuccessPage = () => {
             </div>
           )}
 
-          {isPaid && needsSignature && !contractLoading && (
+          {!isExtensionPayment && isPaid && needsSignature && !contractLoading && (
             <div className="mt-4">
               <CheckoutContractPanel
                 content={contract?.content}
@@ -97,7 +126,7 @@ const PaymentSuccessPage = () => {
             </div>
           )}
 
-          {isPaid && isContractSigned && (
+          {!isExtensionPayment && isPaid && isContractSigned && (
             <div className="rounded-2xl border border-slate-200 bg-white p-8 sm:p-12 shadow-sm mt-4">
               <CheckCircle className="h-14 w-14 text-emerald-500 mx-auto mb-6" />
               <h1 className="text-2xl font-bold text-primary mb-2">Reserva confirmada</h1>
@@ -108,26 +137,26 @@ const PaymentSuccessPage = () => {
               <ContractSummary contract={contract} reservationSummary={reservationSummary} />
 
               <Link
-                to="/guest"
+                to="/tenant/reservations"
                 className="inline-flex items-center justify-center gap-2 min-h-[48px] px-8 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors"
               >
                 <LayoutDashboard className="h-4 w-4" />
-                Volver al Dashboard
+                Ver mis reservas
               </Link>
             </div>
           )}
 
-          {!isPaymentPending && !isPaid && reservationId && (
+          {!isExtensionPayment && !isPaymentPending && !isPaid && reservationId && (
             <div className="rounded-2xl border border-slate-200 bg-white p-8 sm:p-12 shadow-sm mt-4">
               <h1 className="text-xl font-bold text-primary mb-2">Estado: {status ?? 'pendiente'}</h1>
               <p className="text-sm text-slate-500 mb-6">
                 El pago aún no se ha confirmado. Si ya pagaste, espera unos segundos o contacta soporte.
               </p>
               <Link
-                to="/guest"
+                to="/tenant/reservations"
                 className="inline-flex items-center justify-center gap-2 min-h-[48px] px-8 rounded-xl border border-slate-200 text-sm font-semibold text-primary hover:bg-slate-50 transition-colors"
               >
-                Volver al Dashboard
+                Ver mis reservas
               </Link>
             </div>
           )}

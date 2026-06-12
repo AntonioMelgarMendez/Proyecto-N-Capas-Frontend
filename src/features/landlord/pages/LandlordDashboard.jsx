@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { LayoutGrid, House, Inbox, Wrench, Star, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import Sidebar from '../../../components/layout/Sidebar';
 import PropertyLandlordCard from '../components/PropertyLandlordCard';
 import { propertyApi } from '../../../api/propertyApi';
-
-// Temporal hasta que el módulo de auth esté listo
-const MOCK_LANDLORD_ID = 1;
+import { useLandlordSidebar, MOCK_LANDLORD_ID } from '../hooks/useLandlordSidebar';
 
 const SkeletonCard = () => (
   <div className="rounded-xl bg-white overflow-hidden border border-slate-100 animate-pulse">
@@ -27,8 +25,8 @@ const SkeletonCard = () => (
 const LandlordDashboard = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(null); // { id, title }
+  const sidebar = useLandlordSidebar();
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['properties', 'landlord', MOCK_LANDLORD_ID],
@@ -49,24 +47,16 @@ const LandlordDashboard = () => {
   const handleDeleteRequest = (id, title) => setConfirmDelete({ id, title });
   const handleDeleteConfirm = () => deleteMutation.mutate(confirmDelete.id);
 
-  const sidebarItems = [
-    { id: 'dashboard',    label: 'Dashboard',         icon: LayoutGrid, action: () => navigate('/landlord') },
-    { id: 'propiedades',  label: 'Mis Propiedades',   icon: House,      active: true, action: () => {} },
-    { id: 'solicitudes',  label: 'Solicitudes',        icon: Inbox,      action: () => navigate('/landlord/requests') },
-    { id: 'mantenimiento',label: 'Mantenimiento',      icon: Wrench,     action: () => navigate('/landlord/tickets') },
-    { id: 'reviews',      label: 'Reseñas',            icon: Star,       action: () => navigate('/landlord/reviews') },
-  ];
-
   return (
     <div className="bg-bg-main min-h-screen">
       <Sidebar
-        items={sidebarItems}
+        items={sidebar.items}
         role="PROPIETARIO"
-        isCollapsed={isCollapsed}
-        onToggle={() => setIsCollapsed(!isCollapsed)}
+        isCollapsed={sidebar.isCollapsed}
+        onToggle={() => sidebar.setIsCollapsed(!sidebar.isCollapsed)}
       />
 
-      <main className={`transition-all duration-300 p-4 sm:p-6 md:p-8 ml-0 pt-14 lg:pt-0 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
+      <main className={sidebar.mainClass(sidebar.isCollapsed)}>
 
         {/* Header */}
         <div className="flex flex-wrap items-end justify-between gap-3 mb-6">

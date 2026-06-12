@@ -7,8 +7,7 @@ import {
 } from 'lucide-react';
 import Sidebar from '../../../components/layout/Sidebar';
 import { propertyApi } from '../../../api/propertyApi';
-
-const MOCK_LANDLORD_ID = 1;
+import { useLandlordSidebar, MOCK_LANDLORD_ID } from '../hooks/useLandlordSidebar';
 
 const EMPTY_FORM = {
   title: '',
@@ -49,7 +48,7 @@ const PropertyForm = () => {
   const isNew = id === 'new';
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const sidebar = useLandlordSidebar();
   const [form, setForm] = useState(EMPTY_FORM);
   const [pendingPhotos, setPendingPhotos] = useState([]);
   const [uploadStatus, setUploadStatus] = useState('');
@@ -169,20 +168,11 @@ const PropertyForm = () => {
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   /* ── Sidebar ────────────────────────────────────────────── */
-  const sidebarItems = [
-    { id: 'dashboard',     label: 'Dashboard',       icon: LayoutGrid, action: () => navigate('/landlord') },
-    { id: 'propiedades',   label: 'Mis Propiedades', icon: House, active: true, action: () => navigate('/landlord/properties') },
-    { id: 'solicitudes',   label: 'Solicitudes',     icon: Inbox,      action: () => navigate('/landlord/requests') },
-    { id: 'mantenimiento', label: 'Mantenimiento',   icon: Wrench,     action: () => navigate('/landlord/tickets') },
-    { id: 'reviews',       label: 'Reseñas',         icon: Star,       action: () => navigate('/landlord/reviews') },
-  ];
-
-  /* ── Loading ────────────────────────────────────────────── */
   if (!isNew && propLoading) {
     return (
       <div className="bg-bg-main min-h-screen">
-        <Sidebar items={sidebarItems} role="PROPIETARIO" isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} />
-        <main className={`transition-all duration-300 p-4 sm:p-6 md:p-8 ml-0 pt-14 lg:pt-0 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
+        <Sidebar items={sidebar.items} role="PROPIETARIO" isCollapsed={sidebar.isCollapsed} onToggle={() => sidebar.setIsCollapsed(!sidebar.isCollapsed)} />
+        <main className={sidebar.mainClass(sidebar.isCollapsed)}>
           <div className="animate-pulse max-w-5xl space-y-5">
             <div className="h-5 w-28 bg-slate-100 rounded" />
             <div className="h-9 w-64 bg-slate-100 rounded" />
@@ -207,13 +197,13 @@ const PropertyForm = () => {
   return (
     <div className="bg-bg-main min-h-screen">
       <Sidebar
-        items={sidebarItems}
+        items={sidebar.items}
         role="PROPIETARIO"
-        isCollapsed={isCollapsed}
-        onToggle={() => setIsCollapsed(!isCollapsed)}
+        isCollapsed={sidebar.isCollapsed}
+        onToggle={() => sidebar.setIsCollapsed(!sidebar.isCollapsed)}
       />
 
-      <main className={`transition-all duration-300 p-4 sm:p-6 md:p-8 ml-0 pt-14 lg:pt-0 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
+      <main className={sidebar.mainClass(sidebar.isCollapsed)}>
         <div className="max-w-5xl space-y-6">
 
           {/* Header */}
