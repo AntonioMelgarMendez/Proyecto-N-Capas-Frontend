@@ -7,13 +7,17 @@ import ConfirmModal from '../../../components/ui/ConfirmModal';
 import FeedbackModal from '../../../components/ui/FeedbackModal';
 import { reservationApi } from '../../../api/reservationApi';
 import { paymentsApi } from '../../../api/paymentsApi';
+import { reviewApi } from '../../../api/reviewApi';
+import { propertyApi } from '../../../api/propertyApi';
 import { MOCK_TENANT_ID } from '../../checkout/constants';
+import { canTenantReview, isReviewEligibleStatus } from '../constants/reviewEligibility';
 import { getActiveExtensionRequest } from '../constants/extensionStatus';
 import { useExtensionCheckout } from '../hooks/useExtensionCheckout';
 import { useReservationCheckout } from '../hooks/useReservationCheckout';
 import TenantReservationCard from '../components/TenantReservationCard';
 import ExtendStayModal from '../components/ExtendStayModal';
 import CancelReservationModal from '../components/CancelReservationModal';
+import SubmitReviewModal from '../components/SubmitReviewModal';
 
 const TenantReservations = () => {
   const navigate = useNavigate();
@@ -44,6 +48,31 @@ const TenantReservations = () => {
     [reservations],
   );
 
+  const reviewablePropertyIds = useMemo(
+    () => [...new Set(reservations.filter((r) => isReviewEligibleStatus(r.status)).map((r) => r.propertyId))],
+    [reservations],
+  );
+
+  const reviewQueries = useQueries({
+    queries: reviewablePropertyIds.map((propertyId) => ({
+      queryKey: ['reviews', 'property', propertyId],
+      queryFn: () => reviewApi.getByProperty(propertyId).then((r) => r.data ?? []),
+      enabled: !!propertyId,
+    })),
+  });
+
+  const reviewedReservationIds = useMemo(() => {
+    const ids = new Set();
+    reviewQueries.forEach((query) => {
+      (query.data ?? []).forEach((review) => {
+        if (review.reviewerId === MOCK_TENANT_ID && review.reservationId) {
+          ids.add(review.reservationId);
+        }
+      });
+    });
+    return ids;
+  }, [reviewQueries]);
+
   const extensionQueries = useQueries({
     queries: extendableIds.map((id) => ({
       queryKey: ['extension-requests', id],
@@ -59,6 +88,12 @@ const TenantReservations = () => {
     });
     return map;
   }, [extendableIds, extensionQueries]);
+
+  const reviewPropertyQuery = useQuery({
+    queryKey: ['property', selectedRes?.propertyId],
+    queryFn: () => propertyApi.getById(selectedRes.propertyId).then((r) => r.data),
+    enabled: !!selectedRes && modalType === 'review' && !!selectedRes.propertyId,
+  });
 
   const quoteExtensionQuery = useQuery({
     queryKey: ['extend-quote', selectedRes?.id, extraDays],
@@ -139,6 +174,43 @@ const TenantReservations = () => {
     },
   });
 
+  const submitReviewMutation = useMutation({
+    mutationFn: ({ rating, comment }) => {
+      const landlordId = reviewPropertyQuery.data?.landlordId;
+      if (!landlordId) throw new Error('No se pudo obtener el arrendador de la propiedad.');
+      if (!isReviewEligibleStatus(selectedRes?.status)) {
+        throw new Error('Esta reserva aún no puede reseñarse.');
+      }
+      if (reviewedReservationIds.has(selectedRes.id)) throw new Error('Ya enviaste una reseña para esta reserva.');
+
+      return reviewApi.create({
+        propertyId: selectedRes.propertyId,
+        reservationId: selectedRes.id,
+        reviewerId: MOCK_TENANT_ID,
+        revieweeId: landlordId,
+        reviewType: 'TENANT_TO_LANDLORD',
+        rating,
+        comment,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reviews'] });
+      closeModal();
+      setFeedback({
+        variant: 'success',
+        title: 'Reseña publicada',
+        message: 'Gracias por compartir tu experiencia.',
+      });
+    },
+    onError: (err) => {
+      setFeedback({
+        variant: 'error',
+        title: 'Error al publicar',
+        message: err?.message || 'No se pudo enviar la reseña.',
+      });
+    },
+  });
+
   const closeModal = () => {
     setSelectedRes(null);
     setModalType(null);
@@ -156,6 +228,25 @@ const TenantReservations = () => {
     if (!confirmCancelCheckoutId) return;
     setPendingCancelCheckoutId(confirmCancelCheckoutId);
     cancelCheckoutMutation.mutate(confirmCancelCheckoutId);
+  };
+
+  const handleOpenReview = (res) => {
+    if (!canTenantReview(res, reviewedReservationIds)) {
+      setFeedback({
+        variant: 'info',
+        title: 'Reseña no disponible',
+        message: !isReviewEligibleStatus(res.status)
+          ? 'Esta reserva aún no puede reseñarse.'
+          : 'Ya enviaste una reseña para esta reserva.',
+      });
+      return;
+    }
+    setSelectedRes(res);
+    setModalType('review');
+  };
+
+  const handleSubmitReview = ({ rating, comment }) => {
+    submitReviewMutation.mutate({ rating, comment });
   };
 
   const filterReservations = (list) => {
@@ -262,6 +353,8 @@ const TenantReservations = () => {
                   onCompletePayment={handleCompletePayment}
                   onCancelCheckout={setConfirmCancelCheckoutId}
                   onPayExtension={handlePayExtension}
+                  onReview={handleOpenReview}
+                  hasReviewed={reviewedReservationIds.has(res.id)}
                   isPaymentPending={pendingPaymentId === res.id && reservationCheckout.isPending}
                   isCancelCheckoutPending={pendingCancelCheckoutId === res.id && cancelCheckoutMutation.isPending}
                   isPayExtensionPending={extensionCheckout.isPending}
@@ -291,6 +384,17 @@ const TenantReservations = () => {
         reservation={selectedRes}
         quoteQuery={quoteCancellationQuery}
         confirmMutation={confirmCancellationMutation}
+      />
+
+      <SubmitReviewModal
+        key={selectedRes?.id ?? 'review'}
+        isOpen={!!selectedRes && modalType === 'review'}
+        onClose={closeModal}
+        reservation={selectedRes}
+        landlordId={reviewPropertyQuery.data?.landlordId}
+        isLoadingLandlord={reviewPropertyQuery.isLoading}
+        onSubmit={handleSubmitReview}
+        isPending={submitReviewMutation.isPending}
       />
 
       <ConfirmModal

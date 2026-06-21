@@ -1,6 +1,7 @@
-import { MapPin, CalendarCheck2, FileText, Key, Calendar, XCircle, CreditCard, Ban } from 'lucide-react';
+import { MapPin, CalendarCheck2, FileText, Key, Calendar, XCircle, CreditCard, Ban, Star } from 'lucide-react';
 import IconButton from '../../../components/ui/IconButton';
 import { getExtensionStatusLabel, getExtensionStatusClasses, getActiveExtensionRequest } from '../constants/extensionStatus';
+import { isReviewEligibleStatus } from '../constants/reviewEligibility';
 
 const TenantReservationCard = ({
   res,
@@ -13,6 +14,8 @@ const TenantReservationCard = ({
   onCompletePayment,
   onCancelCheckout,
   onPayExtension,
+  onReview,
+  hasReviewed,
   isPaymentPending,
   isCancelCheckoutPending,
   isPayExtensionPending,
@@ -89,7 +92,7 @@ const TenantReservationCard = ({
               </span>
               <span className="flex items-center gap-1">
                 <FileText className="h-3.5 w-3.5 text-slate-400" />
-                Contrato: <strong className={res.contractStatus === 'Firmado' ? 'text-emerald-600' : 'text-amber-600'}>{res.contractStatus}</strong>
+                Contrato: <strong className={['Firmado', 'Firmado por ti'].includes(res.contractStatus) ? 'text-emerald-600' : 'text-amber-600'}>{res.contractStatus}</strong>
               </span>
               {res.status === 'CONFIRMED' && (
                 <span className="flex items-center gap-1">
@@ -179,6 +182,24 @@ const TenantReservationCard = ({
             >
               {isPinVisible ? 'Ocultar PIN' : 'Ver PIN'}
             </IconButton>
+          )}
+
+          {isReviewEligibleStatus(res.status) && (
+            hasReviewed ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                Reseña enviada
+              </span>
+            ) : (
+              <IconButton
+                icon={Star}
+                onClick={() => onReview(res)}
+                variant="primary"
+                iconSize={14}
+              >
+                Dejar reseña
+              </IconButton>
+            )
           )}
 
           <IconButton

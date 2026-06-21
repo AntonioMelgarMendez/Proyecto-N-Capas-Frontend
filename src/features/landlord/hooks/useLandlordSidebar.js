@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { House, Inbox, Wrench, Star } from 'lucide-react';
+import { House, Inbox, Wrench, Star, BarChart3 } from 'lucide-react';
 
 export const MOCK_LANDLORD_ID = 1;
 
@@ -12,7 +12,8 @@ export const useLandlordSidebar = () => {
   const items = [
     { id: 'propiedades', label: 'Mis Propiedades', icon: House, active: location.pathname.startsWith('/landlord/properties'), action: () => navigate('/landlord/properties') },
     { id: 'requests', label: 'Solicitudes', icon: Inbox, active: location.pathname === '/landlord/requests', action: () => navigate('/landlord/requests') },
-    { id: 'tickets', label: 'Mantenimiento', icon: Wrench, action: () => navigate('/landlord/tickets') },
+    { id: 'tickets', label: 'Mantenimiento', icon: Wrench, active: location.pathname === '/landlord/tickets', action: () => navigate('/landlord/tickets') },
+    { id: 'analytics', label: 'Analítica', icon: BarChart3, active: location.pathname === '/landlord/analytics', action: () => navigate('/landlord/analytics') },
     { id: 'reviews', label: 'Reseñas', icon: Star, active: location.pathname === '/landlord/reviews', action: () => navigate('/landlord/reviews') },
   ];
 

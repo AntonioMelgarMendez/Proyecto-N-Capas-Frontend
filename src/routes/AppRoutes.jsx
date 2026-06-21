@@ -11,6 +11,9 @@ import LandlordDashboard from '../features/landlord/pages/LandlordDashboard';
 import LandlordExtensionRequests from '../features/landlord/pages/LandlordExtensionRequests';
 import PropertyForm from '../features/landlord/pages/PropertyForm';
 import LandlordReviews from '../features/landlord/pages/LandlordReviews';
+import TenantMaintenance from '../features/guest/pages/TenantMaintenance';
+import LandlordTickets from '../features/landlord/pages/LandlordTickets';
+import LandlordAnalytics from '../features/landlord/pages/LandlordAnalytics';
 
 const AppRoutes = () => {
   return (
@@ -25,6 +28,7 @@ const AppRoutes = () => {
         <Route path="/tenant/property/:id" element={<PropertyDetail />} />
         <Route path="/tenant/checkout/:reservationId" element={<CheckoutPage />} />
         <Route path="/tenant/reservations" element={<TenantReservations />} />
+        <Route path="/tenant/maintenance" element={<TenantMaintenance />} />
         <Route path="/tenant/payment-success" element={<PaymentSuccessPage />} />
         <Route path="/payment/success" element={<PaymentSuccessPage />} />
         <Route path="/payment/cancel" element={<PaymentCancelPage />} />
@@ -35,6 +39,8 @@ const AppRoutes = () => {
         <Route path="/landlord/properties/:id" element={<PropertyForm />} />
         <Route path="/landlord/reviews" element={<LandlordReviews />} />
         <Route path="/landlord/requests" element={<LandlordExtensionRequests />} />
+        <Route path="/landlord/tickets" element={<LandlordTickets />} />
+        <Route path="/landlord/analytics" element={<LandlordAnalytics />} />
 
         {/* Fallback wildcard to redirect undefined routes back to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
