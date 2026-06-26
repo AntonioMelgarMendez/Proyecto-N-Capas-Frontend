@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Sidebar from '../../../components/layout/Sidebar';
 import { analyticsApi } from '../../../api/analyticsApi';
-import { useLandlordSidebar, MOCK_LANDLORD_ID } from '../hooks/useLandlordSidebar';
+import { useLandlordSidebar } from '../hooks/useLandlordSidebar';
 
 const toIsoDate = (date) => date.toISOString().split('T')[0];
 
@@ -30,20 +30,21 @@ const MetricBar = ({ label, value, max, color = 'bg-accent' }) => {
 
 const LandlordAnalytics = () => {
   const sidebar = useLandlordSidebar();
+  const { landlordId } = sidebar;
   const initial = defaultRange();
   const [startDate, setStartDate] = useState(initial.start);
   const [endDate, setEndDate] = useState(initial.end);
 
   const { data: occupancyRes, isLoading: occLoading, isError: occError, refetch: refetchOcc } = useQuery({
-    queryKey: ['analytics-occupancy', MOCK_LANDLORD_ID, startDate, endDate],
-    queryFn: () => analyticsApi.getOccupancyByLandlord(MOCK_LANDLORD_ID, startDate, endDate).then((r) => r.data ?? []),
-    enabled: !!startDate && !!endDate,
+    queryKey: ['analytics-occupancy', landlordId, startDate, endDate],
+    queryFn: () => analyticsApi.getOccupancyByLandlord(landlordId, startDate, endDate).then((r) => r.data ?? []),
+    enabled: !!landlordId && !!startDate && !!endDate,
   });
 
   const { data: maintenanceRes, isLoading: maintLoading, isError: maintError, refetch: refetchMaint } = useQuery({
-    queryKey: ['analytics-maintenance', MOCK_LANDLORD_ID, startDate, endDate],
-    queryFn: () => analyticsApi.getMaintenanceByLandlord(MOCK_LANDLORD_ID, startDate, endDate).then((r) => r.data ?? []),
-    enabled: !!startDate && !!endDate,
+    queryKey: ['analytics-maintenance', landlordId, startDate, endDate],
+    queryFn: () => analyticsApi.getMaintenanceByLandlord(landlordId, startDate, endDate).then((r) => r.data ?? []),
+    enabled: !!landlordId && !!startDate && !!endDate,
   });
 
   const occupancy = occupancyRes ?? [];

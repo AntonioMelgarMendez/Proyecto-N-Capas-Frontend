@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import Sidebar from '../../../components/layout/Sidebar';
 import { propertyApi } from '../../../api/propertyApi';
-import { useLandlordSidebar, MOCK_LANDLORD_ID } from '../hooks/useLandlordSidebar';
+import { useLandlordSidebar } from '../hooks/useLandlordSidebar';
 
 const EMPTY_FORM = {
   title: '',
@@ -20,7 +20,7 @@ const EMPTY_FORM = {
   bathrooms: 1,
   maxGuests: 1,
   isAvailable: true,
-  landlordId: MOCK_LANDLORD_ID,
+  landlordId: null,
 };
 
 const Field = ({ label, required, children }) => (
@@ -49,7 +49,8 @@ const PropertyForm = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const sidebar = useLandlordSidebar();
-  const [form, setForm] = useState(EMPTY_FORM);
+  const { landlordId } = sidebar;
+  const [form, setForm] = useState({ ...EMPTY_FORM, landlordId });
   const [pendingPhotos, setPendingPhotos] = useState([]);
   const [uploadStatus, setUploadStatus] = useState('');
   const [existingPhotos, setExistingPhotos] = useState([]);
@@ -82,10 +83,10 @@ const PropertyForm = () => {
         bathrooms: propData.bathrooms ?? 1,
         maxGuests: propData.maxGuests ?? 1,
         isAvailable: propData.isAvailable ?? true,
-        landlordId: MOCK_LANDLORD_ID,
+        landlordId,
       });
     }
-  }, [propData]);
+  }, [propData, landlordId]);
 
   useEffect(() => {
     if (photosRes) setExistingPhotos(photosRes);
@@ -107,7 +108,7 @@ const PropertyForm = () => {
         setUploadStatus('Subiendo fotos...');
         await uploadPhotos(newId, pendingPhotos);
       }
-      queryClient.invalidateQueries({ queryKey: ['properties', 'landlord', MOCK_LANDLORD_ID] });
+      queryClient.invalidateQueries({ queryKey: ['properties', 'landlord', landlordId] });
       navigate('/landlord/properties');
     },
     onError: (err) => setServerError(err?.message ?? 'Error al crear la propiedad'),
@@ -120,7 +121,7 @@ const PropertyForm = () => {
         setUploadStatus('Subiendo fotos...');
         await uploadPhotos(id, pendingPhotos);
       }
-      queryClient.invalidateQueries({ queryKey: ['properties', 'landlord', MOCK_LANDLORD_ID] });
+      queryClient.invalidateQueries({ queryKey: ['properties', 'landlord', landlordId] });
       queryClient.invalidateQueries({ queryKey: ['photos', id] });
       navigate('/landlord/properties');
     },

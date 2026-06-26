@@ -2,17 +2,19 @@ import { useMutation } from '@tanstack/react-query';
 import { paymentsApi } from '../../../api/paymentsApi';
 import { reservationApi } from '../../../api/reservationApi';
 import { saveCheckoutContext } from '../utils/checkoutContext';
-import { MOCK_TENANT_ID } from '../constants';
+import { useStore } from '../../../store/useStore';
 
-export const usePaymentCheckout = () =>
-  useMutation({
+export const usePaymentCheckout = () => {
+  const tenantId = useStore((s) => s.user?.id);
+
+  return useMutation({
     mutationFn: async ({ reservationId, checkoutContext }) => {
       let targetId = reservationId;
 
       if (reservationId === 'pending') {
         const resBook = await reservationApi.book(checkoutContext.propertyId, {
           propertyId: checkoutContext.propertyId,
-          tenantId: MOCK_TENANT_ID,
+          tenantId,
           checkInDate: checkoutContext.checkIn,
           checkOutDate: checkoutContext.checkOut,
           numberOfGuests: checkoutContext.numberOfGuests,
@@ -54,3 +56,4 @@ export const usePaymentCheckout = () =>
       window.location.href = checkoutUrl;
     },
   });
+};

@@ -6,7 +6,7 @@ import Sidebar from '../../../components/layout/Sidebar';
 import ReviewCard from '../../catalog/components/ReviewCard';
 import { propertyApi } from '../../../api/propertyApi';
 import { reviewApi } from '../../../api/reviewApi';
-import { useLandlordSidebar, MOCK_LANDLORD_ID } from '../hooks/useLandlordSidebar';
+import { useLandlordSidebar } from '../hooks/useLandlordSidebar';
 
 const RatingBar = ({ star, count, total }) => {
   const pct = total > 0 ? Math.round((count / total) * 100) : 0;
@@ -25,12 +25,14 @@ const RatingBar = ({ star, count, total }) => {
 const LandlordReviews = () => {
   const navigate = useNavigate();
   const sidebar = useLandlordSidebar();
+  const { landlordId } = sidebar;
   const [filterPropId, setFilterPropId] = useState('all');
 
   /* ── Fetch properties ───────────────────────────────────── */
   const { data: propsData, isLoading: propsLoading } = useQuery({
-    queryKey: ['properties', 'landlord', MOCK_LANDLORD_ID],
-    queryFn: () => propertyApi.getByLandlord(MOCK_LANDLORD_ID).then((r) => r.data ?? []),
+    queryKey: ['properties', 'landlord', landlordId],
+    queryFn: () => propertyApi.getByLandlord(landlordId).then((r) => r.data ?? []),
+    enabled: !!landlordId,
   });
 
   const properties = propsData ?? [];

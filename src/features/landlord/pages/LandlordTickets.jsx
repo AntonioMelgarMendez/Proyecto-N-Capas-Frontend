@@ -4,7 +4,7 @@ import { Inbox } from 'lucide-react';
 import Sidebar from '../../../components/layout/Sidebar';
 import FeedbackModal from '../../../components/ui/FeedbackModal';
 import { maintenanceApi } from '../../../api/maintenanceApi';
-import { useLandlordSidebar, MOCK_LANDLORD_ID } from '../hooks/useLandlordSidebar';
+import { useLandlordSidebar } from '../hooks/useLandlordSidebar';
 import TicketCard from '../../maintenance/components/TicketCard';
 
 const TABS = [
@@ -16,20 +16,22 @@ const TABS = [
 
 const LandlordTickets = () => {
   const sidebar = useLandlordSidebar();
+  const { landlordId } = sidebar;
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
   const [feedback, setFeedback] = useState(null);
 
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ['landlord-tickets', MOCK_LANDLORD_ID, activeTab],
+    queryKey: ['landlord-tickets', landlordId, activeTab],
     queryFn: () =>
-      maintenanceApi.getByLandlord(MOCK_LANDLORD_ID, activeTab).then((r) => r.data ?? []),
+      maintenanceApi.getByLandlord(landlordId, activeTab).then((r) => r.data ?? []),
+    enabled: !!landlordId,
   });
 
   const statusMutation = useMutation({
     mutationFn: ({ ticketId, status }) =>
-      maintenanceApi.updateStatus(ticketId, status, MOCK_LANDLORD_ID),
+      maintenanceApi.updateStatus(ticketId, status, landlordId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['landlord-tickets'] });
       setUpdatingId(null);

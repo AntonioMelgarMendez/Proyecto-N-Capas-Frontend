@@ -5,7 +5,7 @@ import { Plus } from 'lucide-react';
 import Sidebar from '../../../components/layout/Sidebar';
 import PropertyLandlordCard from '../components/PropertyLandlordCard';
 import { propertyApi } from '../../../api/propertyApi';
-import { useLandlordSidebar, MOCK_LANDLORD_ID } from '../hooks/useLandlordSidebar';
+import { useLandlordSidebar } from '../hooks/useLandlordSidebar';
 
 const SkeletonCard = () => (
   <div className="rounded-xl bg-white overflow-hidden border border-slate-100 animate-pulse">
@@ -26,17 +26,19 @@ const LandlordDashboard = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const sidebar = useLandlordSidebar();
+  const { landlordId } = sidebar;
   const [confirmDelete, setConfirmDelete] = useState(null);
 
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ['properties', 'landlord', MOCK_LANDLORD_ID],
-    queryFn: () => propertyApi.getByLandlord(MOCK_LANDLORD_ID).then((r) => r.data ?? []),
+    queryKey: ['properties', 'landlord', landlordId],
+    queryFn: () => propertyApi.getByLandlord(landlordId).then((r) => r.data ?? []),
+    enabled: !!landlordId,
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => propertyApi.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['properties', 'landlord', MOCK_LANDLORD_ID] });
+      queryClient.invalidateQueries({ queryKey: ['properties', 'landlord', landlordId] });
       setConfirmDelete(null);
     },
   });

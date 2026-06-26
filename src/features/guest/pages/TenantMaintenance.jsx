@@ -1,19 +1,21 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { LayoutGrid, Search, Calendar, Key, Wrench, Plus, Inbox } from 'lucide-react';
+import { Plus, Inbox } from 'lucide-react';
 import Sidebar from '../../../components/layout/Sidebar';
+import { useTenantSidebar } from '../../checkout/hooks/useTenantSidebar';
 import FeedbackModal from '../../../components/ui/FeedbackModal';
 import { maintenanceApi } from '../../../api/maintenanceApi';
 import { reservationApi } from '../../../api/reservationApi';
-import { MOCK_TENANT_ID } from '../../checkout/constants';
+import { useStore } from '../../../store/useStore';
 import TicketCard from '../../maintenance/components/TicketCard';
 import { TICKET_PRIORITY_LABELS } from '../../maintenance/constants/ticketStatus';
 
 const TenantMaintenance = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const tenantId = useStore((s) => s.user?.id);
+  const sidebar = useTenantSidebar();
   const [showForm, setShowForm] = useState(false);
   const [propertyId, setPropertyId] = useState('');
   const [title, setTitle] = useState('');
@@ -23,13 +25,15 @@ const TenantMaintenance = () => {
   const [feedback, setFeedback] = useState(null);
 
   const { data: reservationsRes } = useQuery({
-    queryKey: ['tenant-reservations', MOCK_TENANT_ID],
-    queryFn: () => reservationApi.getTenantReservations(MOCK_TENANT_ID).then((r) => r.data ?? r ?? []),
+    queryKey: ['tenant-reservations', tenantId],
+    queryFn: () => reservationApi.getTenantReservations(tenantId).then((r) => r.data ?? r ?? []),
+    enabled: !!tenantId,
   });
 
   const { data: ticketsRes, isLoading, isError, refetch } = useQuery({
-    queryKey: ['tenant-tickets', MOCK_TENANT_ID],
-    queryFn: () => maintenanceApi.getByTenant(MOCK_TENANT_ID).then((r) => r.data ?? []),
+    queryKey: ['tenant-tickets', tenantId],
+    queryFn: () => maintenanceApi.getByTenant(tenantId).then((r) => r.data ?? []),
+    enabled: !!tenantId,
   });
 
   const properties = useMemo(() => {
@@ -44,7 +48,7 @@ const TenantMaintenance = () => {
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      const res = await maintenanceApi.createTicket(MOCK_TENANT_ID, {
+      const res = await maintenanceApi.createTicket(tenantId, {
         propertyId: Number(propertyId),
         title: title.trim(),
         description: description.trim() || undefined,
@@ -85,21 +89,18 @@ const TenantMaintenance = () => {
     createMutation.mutate();
   };
 
-  const sidebarItems = [
-    { id: 'inicio', label: 'Inicio', icon: LayoutGrid, action: () => navigate('/guest') },
-    { id: 'catalogo', label: 'Catálogo', icon: Search, action: () => navigate('/tenant/catalog') },
-    { id: 'reservas', label: 'Mis Reservas', icon: Calendar, action: () => navigate('/tenant/reservations') },
-    { id: 'llave', label: 'Mi Llave', icon: Key, action: () => navigate('/tenant/key') },
-    { id: 'mantenimiento', label: 'Mantenimiento', icon: Wrench, active: true, action: () => {} },
-  ];
 
   const tickets = ticketsRes ?? [];
 
   return (
     <div className="bg-bg-main min-h-screen">
-      <Sidebar items={sidebarItems} role="INQUILINO" isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} />
+      <Sidebar
+        items={sidebar.items.map((i) => ({ ...i, active: i.id === 'mantenimiento' }))}
+        isCollapsed={sidebar.isCollapsed}
+        onToggle={() => sidebar.setIsCollapsed(!sidebar.isCollapsed)}
+      />
 
-      <main className={`transition-all duration-300 p-6 md:p-8 ml-0 pt-16 lg:pt-8 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
+      <main className={sidebar.mainClass(sidebar.isCollapsed)}>
         <div className="max-w-3xl mx-auto space-y-6">
           <div className="space-y-1">
             <span className="text-[11px] font-bold tracking-[0.2em] text-accent uppercase">Inquilino</span>

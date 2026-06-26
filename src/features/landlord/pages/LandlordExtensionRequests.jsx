@@ -5,7 +5,7 @@ import Sidebar from '../../../components/layout/Sidebar';
 import ConfirmModal from '../../../components/ui/ConfirmModal';
 import FeedbackModal from '../../../components/ui/FeedbackModal';
 import { reservationApi } from '../../../api/reservationApi';
-import { useLandlordSidebar, MOCK_LANDLORD_ID } from '../hooks/useLandlordSidebar';
+import { useLandlordSidebar } from '../hooks/useLandlordSidebar';
 import ExtensionRequestCard from '../components/ExtensionRequestCard';
 
 const TABS = [
@@ -16,6 +16,7 @@ const TABS = [
 
 const LandlordExtensionRequests = () => {
   const sidebar = useLandlordSidebar();
+  const { landlordId } = sidebar;
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('PENDING');
   const [actionId, setActionId] = useState(null);
@@ -25,9 +26,10 @@ const LandlordExtensionRequests = () => {
   const statusFilter = activeTab === 'history' ? null : activeTab;
 
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ['landlord-extension-requests', MOCK_LANDLORD_ID, statusFilter],
+    queryKey: ['landlord-extension-requests', landlordId, statusFilter],
     queryFn: () =>
-      reservationApi.getLandlordExtensionRequests(MOCK_LANDLORD_ID, statusFilter).then((r) => r.data ?? []),
+      reservationApi.getLandlordExtensionRequests(landlordId, statusFilter).then((r) => r.data ?? []),
+    enabled: !!landlordId,
   });
 
   const requests = (data ?? []).filter((req) => {
@@ -36,7 +38,7 @@ const LandlordExtensionRequests = () => {
   });
 
   const approveMutation = useMutation({
-    mutationFn: (requestId) => reservationApi.approveExtension(requestId, MOCK_LANDLORD_ID),
+    mutationFn: (requestId) => reservationApi.approveExtension(requestId, landlordId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['landlord-extension-requests'] });
       setActionId(null);
@@ -59,7 +61,7 @@ const LandlordExtensionRequests = () => {
   });
 
   const rejectMutation = useMutation({
-    mutationFn: (requestId) => reservationApi.rejectExtension(requestId, MOCK_LANDLORD_ID),
+    mutationFn: (requestId) => reservationApi.rejectExtension(requestId, landlordId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['landlord-extension-requests'] });
       setActionId(null);

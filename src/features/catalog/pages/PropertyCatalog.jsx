@@ -100,7 +100,7 @@ const PropertyCatalog = () => {
         onToggle={() => setIsCollapsed(!isCollapsed)}
       />
 
-      <main className={`transition-all duration-300 p-4 sm:p-6 md:p-8 ml-0 pt-14 lg:pt-0 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
+      <main className={`h-screen overflow-y-auto transition-all duration-300 p-4 sm:p-6 md:p-8 ml-0 pt-14 lg:pt-8 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
         {/* Header */}
         <div className="mb-6">
           <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent">

@@ -86,6 +86,9 @@ export const reservationApi = {
   getTenantReservations: (tenantId) =>
     apiFetch(`/reservations/tenant/${tenantId}`),
 
+  getLandlordTenants: (landlordId) =>
+    apiFetch(`/reservations/landlord/${landlordId}/tenants`),
+
   extendQuote: (id, extraDays) =>
     apiFetch(`/reservations/${id}/extend/quote?extraDays=${extraDays}`, { method: 'POST' }),
 
