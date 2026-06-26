@@ -1,47 +1,62 @@
+import { apiFetch, getAuthHeaders } from './httpClient';
 
 const BASE = import.meta.env.VITE_API_URL;
-const json = (r) => r.json();
 
 export const propertyApi = {
-  getAll: () => fetch(`${BASE}/properties`).then(json),
-  getAvailable: () => fetch(`${BASE}/properties/available`).then(json),
-  getById: (id) => fetch(`${BASE}/properties/${id}`).then(json),
-  getByLandlord: (id) => fetch(`${BASE}/properties/landlord/${id}`).then(json),
-  getByCity: (city) => fetch(`${BASE}/properties/city/${encodeURIComponent(city)}`).then(json),
+  getAll: () => apiFetch('/properties'),
+
+  getAvailable: () => apiFetch('/properties/available'),
+
+  getById: (id) => apiFetch(`/properties/${id}`),
+
+  getByLandlord: (id) => apiFetch(`/properties/landlord/${id}`),
+
+  getByCity: (city) => apiFetch(`/properties/city/${encodeURIComponent(city)}`),
 
   create: (data) =>
-    fetch(`${BASE}/properties`, {
+    apiFetch('/properties', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
-    }).then(json),
+    }),
 
   update: (id, data) =>
-    fetch(`${BASE}/properties/${id}`, {
+    apiFetch(`/properties/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
-    }).then(json),
+    }),
 
-  delete: (id) => fetch(`${BASE}/properties/${id}`, { method: 'DELETE' }).then(json),
+  delete: (id) => apiFetch(`/properties/${id}`, { method: 'DELETE' }),
 
   addRule: (propertyId, description) =>
-    fetch(`${BASE}/properties/${propertyId}/rules?description=${encodeURIComponent(description)}`, {
+    apiFetch(`/properties/${propertyId}/rules?description=${encodeURIComponent(description)}`, {
       method: 'POST',
-    }).then(json),
+    }),
 
-  deleteRule: (ruleId) =>
-    fetch(`${BASE}/properties/rules/${ruleId}`, { method: 'DELETE' }).then(json),
+  deleteRule: (ruleId) => apiFetch(`/properties/rules/${ruleId}`, { method: 'DELETE' }),
 
-  uploadPhoto: (propertyId, file, isPrimary = false) => {
+  /**
+   * Multipart upload — does NOT set Content-Type so the browser adds the boundary.
+   * Auth header injected manually via getAuthHeaders().
+   */
+  uploadPhoto: async (propertyId, file, isPrimary = false) => {
     const form = new FormData();
     form.append('file', file);
-    return fetch(`${BASE}/properties/${propertyId}/photos?isPrimary=${isPrimary}`, {
+    const res = await fetch(`${BASE}/properties/${propertyId}/photos?isPrimary=${isPrimary}`, {
       method: 'POST',
+      headers: getAuthHeaders(),
       body: form,
-    }).then(json);
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      throw new Error(body || res.statusText);
+    }
+    if (res.status === 204) return null;
+    return res.json();
   },
 
-  getPhotos: (propertyId) => fetch(`${BASE}/properties/${propertyId}/photos`).then(json),
-  deletePhoto: (photoId) => fetch(`${BASE}/properties/photos/${photoId}`, { method: 'DELETE' }).then(json),
+  getPhotos: (propertyId) => apiFetch(`/properties/${propertyId}/photos`),
+
+  deletePhoto: (photoId) => apiFetch(`/properties/photos/${photoId}`, { method: 'DELETE' }),
 };

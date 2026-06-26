@@ -12,12 +12,13 @@ import { propertyApi } from '../../../api/propertyApi';
 import { reviewApi } from '../../../api/reviewApi';
 import { today, addMonths, calcBooking, DURATIONS } from '../utils/booking';
 import { reservationApi } from '../../../api/reservationApi';
-import { MOCK_TENANT_ID } from '../../checkout/constants';
+import { useStore } from '../../../store/useStore';
 import { saveCheckoutContext } from '../../checkout/utils/checkoutContext';
 
 const PropertyDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const tenantId = useStore((s) => s.user?.id);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -166,7 +167,7 @@ const PropertyDetail = () => {
     queryFn: () =>
       reservationApi.quote(Number(id), {
         propertyId: Number(id),
-        tenantId: MOCK_TENANT_ID,
+        tenantId,
         checkInDate: checkIn,
         checkOutDate: checkOut,
         numberOfGuests: numberOfGuests,
@@ -189,6 +190,10 @@ const PropertyDetail = () => {
   const surchargeVal = total > expectedSubtotal ? (total - expectedSubtotal) : 0;
 
   const handleReserve = () => {
+    if (!tenantId) {
+      navigate('/', { state: { from: `/tenant/property/${id}` } });
+      return;
+    }
     const context = {
       propertyId: Number(id),
       propertyTitle: property?.title,
@@ -226,7 +231,7 @@ const PropertyDetail = () => {
     return (
       <div className="bg-bg-main min-h-screen">
         <Sidebar items={sidebarItems} role="INQUILINO" isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} onMobileOpenChange={setIsMobileMenuOpen} />
-        <main className={`transition-all duration-300 p-4 sm:p-6 md:p-8 ml-0 pt-14 lg:pt-0 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
+        <main className={`h-screen overflow-y-auto transition-all duration-300 p-4 sm:p-6 md:p-8 ml-0 pt-14 lg:pt-8 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
           <Link to="/tenant/catalog" className={backLinkClassName}>
             <ArrowLeft className="h-4 w-4" />
             Volver
@@ -251,7 +256,7 @@ const PropertyDetail = () => {
     return (
       <div className="bg-bg-main min-h-screen">
         <Sidebar items={sidebarItems} role="INQUILINO" isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} onMobileOpenChange={setIsMobileMenuOpen} />
-        <main className={`transition-all duration-300 p-4 sm:p-6 md:p-8 ml-0 pt-14 lg:pt-0 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
+        <main className={`h-screen overflow-y-auto transition-all duration-300 p-4 sm:p-6 md:p-8 ml-0 pt-14 lg:pt-8 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
           <Link to="/tenant/catalog" className={backLinkClassName}>
             <ArrowLeft className="h-4 w-4" />
             Volver
@@ -272,7 +277,7 @@ const PropertyDetail = () => {
     <div className="bg-bg-main min-h-screen">
       <Sidebar items={sidebarItems} role="INQUILINO" isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} onMobileOpenChange={setIsMobileMenuOpen} />
 
-      <main className={`transition-all duration-300 p-4 sm:p-6 md:p-8 ml-0 pt-14 lg:pt-0 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
+      <main className={`h-screen overflow-y-auto transition-all duration-300 p-4 sm:p-6 md:p-8 ml-0 pt-14 lg:pt-8 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
         <div className="w-full">
 
           <Link to="/tenant/catalog" className={backLinkClassName}>

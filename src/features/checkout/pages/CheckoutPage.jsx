@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
 import Sidebar from '../../../components/layout/Sidebar';
 import { propertyApi } from '../../../api/propertyApi';
-import { MOCK_TENANT_ID } from '../constants';
 import { loadCheckoutContext } from '../utils/checkoutContext';
+import { useStore } from '../../../store/useStore';
 import { useTenantSidebar } from '../hooks/useTenantSidebar';
 import { useIdentity } from '../hooks/useIdentity';
 import { usePaymentCheckout } from '../hooks/usePaymentCheckout';
@@ -17,6 +17,7 @@ const CheckoutPage = () => {
   const { reservationId } = useParams();
   const location = useLocation();
   const sidebar = useTenantSidebar();
+  const tenantId = useStore((s) => s.user?.id);
 
   const checkoutContext = location.state ?? loadCheckoutContext(reservationId);
   const propertyId = checkoutContext?.propertyId;
@@ -39,7 +40,7 @@ const CheckoutPage = () => {
     uploadMutation,
     previewUrl,
     isLoading: identityLoading,
-  } = useIdentity(MOCK_TENANT_ID);
+  } = useIdentity(tenantId);
 
   const checkoutMutation = usePaymentCheckout();
 

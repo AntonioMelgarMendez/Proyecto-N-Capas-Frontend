@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutGrid, Search, Calendar, Key, Wrench } from 'lucide-react';
+import { LayoutGrid, Search, Calendar, Key, Wrench, AlertTriangle } from 'lucide-react';
 
 export const useTenantSidebar = () => {
   const navigate = useNavigate();
@@ -16,7 +16,8 @@ export const useTenantSidebar = () => {
     { id: 'catalogo', label: 'Catálogo', icon: Search, action: () => navigate('/tenant/catalog') },
     { id: 'reservas', label: 'Mis Reservas', icon: Calendar, action: () => navigate('/tenant/reservations') },
     { id: 'llave', label: 'Mi Llave', icon: Key, action: () => navigate('/tenant/key') },
-    { id: 'mantenimiento', label: 'Mantenimiento', icon: Wrench, action: () => navigate('/tenant/maintenance') },
+    { id: 'mantenimiento', label: 'Mantenimiento', icon: Wrench,         action: () => navigate('/tenant/maintenance') },
+    { id: 'multas',        label: 'Mis Multas',    icon: AlertTriangle,  action: () => navigate('/tenant/fines') },
   ];
 
   return {
@@ -27,6 +28,6 @@ export const useTenantSidebar = () => {
     backLinkClassName,
     items,
     mainClass: (collapsed) =>
-      `transition-all duration-300 p-4 sm:p-6 md:p-8 ml-0 pt-14 lg:pt-0 ${collapsed ? 'lg:ml-20' : 'lg:ml-64'}`,
+      `h-screen overflow-y-auto transition-all duration-300 p-4 sm:p-6 md:p-8 ml-0 pt-14 lg:pt-8 ${collapsed ? 'lg:ml-20' : 'lg:ml-64'}`,
   };
 };

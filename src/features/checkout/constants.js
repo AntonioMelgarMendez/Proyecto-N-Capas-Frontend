@@ -1,5 +1,3 @@
-export const MOCK_TENANT_ID = 1;
-
 export const CHECKOUT_STEPS = ['Verificación KYC', 'Pago', 'Contrato', 'Confirmado'];
 
 export const PAID_STATUSES = ['PAID', 'COMPLETED'];

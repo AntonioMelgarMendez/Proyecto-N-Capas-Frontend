@@ -1,15 +1,16 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient, useQueries } from '@tanstack/react-query';
-import { LayoutGrid, Search, Calendar, Key, Wrench } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import Sidebar from '../../../components/layout/Sidebar';
+import { useTenantSidebar } from '../../checkout/hooks/useTenantSidebar';
 import ConfirmModal from '../../../components/ui/ConfirmModal';
 import FeedbackModal from '../../../components/ui/FeedbackModal';
 import { reservationApi } from '../../../api/reservationApi';
 import { paymentsApi } from '../../../api/paymentsApi';
 import { reviewApi } from '../../../api/reviewApi';
 import { propertyApi } from '../../../api/propertyApi';
-import { MOCK_TENANT_ID } from '../../checkout/constants';
+import { useStore } from '../../../store/useStore';
 import { canTenantReview, isReviewEligibleStatus } from '../constants/reviewEligibility';
 import { getActiveExtensionRequest } from '../constants/extensionStatus';
 import { useExtensionCheckout } from '../hooks/useExtensionCheckout';
@@ -22,7 +23,8 @@ import SubmitReviewModal from '../components/SubmitReviewModal';
 const TenantReservations = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const tenantId = useStore((s) => s.user?.id);
+  const sidebar = useTenantSidebar();
   const [activeTab, setActiveTab] = useState('Todas');
   const [selectedRes, setSelectedRes] = useState(null);
   const [modalType, setModalType] = useState(null);
@@ -37,8 +39,9 @@ const TenantReservations = () => {
   const extensionCheckout = useExtensionCheckout();
 
   const { data: reservationsRes, isLoading, error } = useQuery({
-    queryKey: ['tenant-reservations', MOCK_TENANT_ID],
-    queryFn: () => reservationApi.getTenantReservations(MOCK_TENANT_ID).then((r) => r.data ?? r ?? []),
+    queryKey: ['tenant-reservations', tenantId],
+    queryFn: () => reservationApi.getTenantReservations(tenantId).then((r) => r.data ?? r ?? []),
+    enabled: !!tenantId,
   });
 
   const reservations = reservationsRes ?? [];
@@ -65,7 +68,7 @@ const TenantReservations = () => {
     const ids = new Set();
     reviewQueries.forEach((query) => {
       (query.data ?? []).forEach((review) => {
-        if (review.reviewerId === MOCK_TENANT_ID && review.reservationId) {
+        if (review.reviewerId === tenantId && review.reservationId) {
           ids.add(review.reservationId);
         }
       });
@@ -186,7 +189,7 @@ const TenantReservations = () => {
       return reviewApi.create({
         propertyId: selectedRes.propertyId,
         reservationId: selectedRes.id,
-        reviewerId: MOCK_TENANT_ID,
+        reviewerId: tenantId,
         revieweeId: landlordId,
         reviewType: 'TENANT_TO_LANDLORD',
         rating,
@@ -257,13 +260,6 @@ const TenantReservations = () => {
     return list;
   };
 
-  const sidebarItems = [
-    { id: 'inicio', label: 'Inicio', icon: LayoutGrid, action: () => navigate('/guest') },
-    { id: 'catalogo', label: 'Catálogo', icon: Search, action: () => navigate('/tenant/catalog') },
-    { id: 'reservas', label: 'Mis Reservas', icon: Calendar, active: true, action: () => navigate('/tenant/reservations') },
-    { id: 'llave', label: 'Mi Llave', icon: Key, action: () => navigate('/tenant/key') },
-    { id: 'mantenimiento', label: 'Mantenimiento', icon: Wrench, action: () => navigate('/tenant/maintenance') },
-  ];
 
   const filteredList = filterReservations(reservations);
 
@@ -283,9 +279,13 @@ const TenantReservations = () => {
 
   return (
     <div className="bg-[#f8fafc] min-h-screen text-slate-800">
-      <Sidebar items={sidebarItems} role="INQUILINO" isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} />
+      <Sidebar
+        items={sidebar.items.map((i) => ({ ...i, active: i.id === 'reservas' }))}
+        isCollapsed={sidebar.isCollapsed}
+        onToggle={() => sidebar.setIsCollapsed(!sidebar.isCollapsed)}
+      />
 
-      <main className={`transition-all duration-300 p-6 md:p-8 ml-0 pt-16 lg:pt-8 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
+      <main className={sidebar.mainClass(sidebar.isCollapsed)}>
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="space-y-1">
             <span className="text-[11px] font-bold tracking-[0.2em] text-accent uppercase font-sans">Reservas</span>
