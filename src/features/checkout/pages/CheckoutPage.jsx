@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
 import Sidebar from '../../../components/layout/Sidebar';
 import { propertyApi } from '../../../api/propertyApi';
+import { pickPrimaryPhoto, resolvePropertyPhotoSrc } from '../../../utils/propertyPhoto';
 import { loadCheckoutContext } from '../utils/checkoutContext';
 import { useStore } from '../../../store/useStore';
 import { useTenantSidebar } from '../hooks/useTenantSidebar';
@@ -46,7 +47,7 @@ const CheckoutPage = () => {
 
   const property = propertyRes ?? null;
   const photos = photosRes ?? [];
-  const coverPhoto = photos[0]?.s3Url;
+  const coverPhoto = resolvePropertyPhotoSrc(pickPrimaryPhoto(photos));
 
   const checkIn = checkoutContext?.checkIn;
   const checkOut = checkoutContext?.checkOut;

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Building2 } from 'lucide-react';
+import { resolvePropertyPhotoSrc } from '../../../utils/propertyPhoto';
 
 const NoPhoto = () => (
   <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#091124] to-slate-800 select-none">
@@ -15,11 +16,15 @@ const PhotoGallery = ({ photos = [], large = false }) => {
   const [current, setCurrent] = useState(0);
   const [failedSet, setFailedSet] = useState(new Set());
 
-  const validPhotos = photos.filter((p) => !failedSet.has(p.s3Url));
-  const hasPhotos = validPhotos.length > 0;
+  const photoEntries = photos
+    .map((photo) => ({ photo, src: resolvePropertyPhotoSrc(photo) }))
+    .filter((entry) => entry.src && !failedSet.has(entry.src));
 
-  const prev = () => setCurrent((c) => (c - 1 + validPhotos.length) % validPhotos.length);
-  const next = () => setCurrent((c) => (c + 1) % validPhotos.length);
+  const hasPhotos = photoEntries.length > 0;
+  const currentEntry = photoEntries[current];
+
+  const prev = () => setCurrent((c) => (c - 1 + photoEntries.length) % photoEntries.length);
+  const next = () => setCurrent((c) => (c + 1) % photoEntries.length);
 
   const handleError = (url) => {
     setFailedSet((prev) => new Set([...prev, url]));
@@ -33,13 +38,13 @@ const PhotoGallery = ({ photos = [], large = false }) => {
   return (
     <div className={`overflow-hidden bg-white border border-slate-100 shadow-sm ${large ? 'w-full rounded-2xl' : 'rounded-2xl'}`}>
       <div className={mainFrameClass}>
-        {hasPhotos ? (
+        {hasPhotos && currentEntry ? (
           <img
-            key={validPhotos[current]?.s3Url}
-            src={validPhotos[current]?.s3Url}
+            key={currentEntry.src}
+            src={currentEntry.src}
             alt={`Foto ${current + 1}`}
             className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-300"
-            onError={() => handleError(validPhotos[current]?.s3Url)}
+            onError={() => handleError(currentEntry.src)}
           />
         ) : (
           <div className="absolute inset-0">
@@ -51,7 +56,7 @@ const PhotoGallery = ({ photos = [], large = false }) => {
           <div className="absolute inset-0 bg-gradient-to-t from-[#091124]/30 via-transparent to-transparent pointer-events-none" />
         )}
 
-        {validPhotos.length > 1 && (
+        {photoEntries.length > 1 && (
           <>
             <button
               type="button"
@@ -68,17 +73,17 @@ const PhotoGallery = ({ photos = [], large = false }) => {
               <ChevronRight className="h-5 w-5 text-[#091124]" />
             </button>
             <div className="absolute bottom-3 right-3 rounded-full bg-white/95 px-3 py-1 text-[11px] font-bold tracking-wide text-[#091124] shadow-sm">
-              {current + 1} / {validPhotos.length}
+              {current + 1} / {photoEntries.length}
             </div>
           </>
         )}
       </div>
 
-      {validPhotos.length > 1 && (
+      {photoEntries.length > 1 && (
         <div className={`flex overflow-x-auto bg-white border-t border-slate-100 ${large ? 'gap-2.5 p-3' : 'gap-2.5 p-3'}`}>
-          {validPhotos.map((photo, i) => (
+          {photoEntries.map((entry, i) => (
             <button
-              key={photo.id || i}
+              key={entry.photo.id || i}
               type="button"
               onClick={() => setCurrent(i)}
               className={`relative flex-shrink-0 overflow-hidden rounded-lg transition-all duration-200 ${
@@ -86,10 +91,10 @@ const PhotoGallery = ({ photos = [], large = false }) => {
               } ${i === current ? 'ring-2 ring-accent opacity-100' : 'opacity-50 hover:opacity-100'}`}
             >
               <img
-                src={photo.s3Url}
+                src={entry.src}
                 alt={`Miniatura ${i + 1}`}
                 className="h-full w-full object-cover object-center"
-                onError={() => handleError(photo.s3Url)}
+                onError={() => handleError(entry.src)}
               />
             </button>
           ))}

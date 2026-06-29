@@ -64,5 +64,7 @@ export const propertyApi = {
 
   getPhotos: (propertyId) => apiFetch(`/properties/${propertyId}/photos`),
 
+  getPhotoImageUrl: (photoId) => `${BASE}/properties/photos/${photoId}/image`,
+
   deletePhoto: (photoId) => apiFetch(`/properties/photos/${photoId}`, { method: 'DELETE' }),
 };
