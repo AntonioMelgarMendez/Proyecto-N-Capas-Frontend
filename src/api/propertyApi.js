@@ -50,7 +50,13 @@ export const propertyApi = {
     });
     if (!res.ok) {
       const body = await res.text().catch(() => '');
-      throw new Error(body || res.statusText);
+      try {
+        const json = JSON.parse(body);
+        throw new Error(json.message || json.error || body || res.statusText);
+      } catch (err) {
+        if (err instanceof Error && err.message !== body) throw err;
+        throw new Error(body || res.statusText);
+      }
     }
     if (res.status === 204) return null;
     return res.json();
