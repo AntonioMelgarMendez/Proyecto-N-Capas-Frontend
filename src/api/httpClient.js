@@ -1,5 +1,7 @@
 const BASE = import.meta.env.VITE_API_URL;
 
+export const isApiConfigured = () => Boolean(BASE);
+
 export class ApiError extends Error {
   constructor(message, status) {
     super(message);
@@ -30,10 +32,12 @@ const parseErrorBody = (bodyText) => {
 };
 
 const PUBLIC_PATHS = ['/tenant/catalog', '/tenant/property'];
+const PAYMENT_CALLBACK_PATHS = ['/payment/success', '/payment/cancel', '/tenant/payment-success'];
 
 const handleUnauthorized = () => {
-  const isPublicPage = PUBLIC_PATHS.some((p) => window.location.pathname.startsWith(p));
-  if (isPublicPage) return;
+  const path = window.location.pathname;
+  const skipRedirect = [...PUBLIC_PATHS, ...PAYMENT_CALLBACK_PATHS].some((p) => path.startsWith(p));
+  if (skipRedirect) return;
   localStorage.removeItem('token');
   localStorage.removeItem('rent-pro-auth');
   window.location.replace('/');
@@ -41,6 +45,13 @@ const handleUnauthorized = () => {
 
 export const apiFetch = async (path, options = {}) => {
   const { allow404 = false, headers, ...rest } = options;
+
+  if (!BASE) {
+    throw new ApiError(
+      'VITE_API_URL no está configurada. Define la variable de entorno en Vercel antes del deploy.',
+      0,
+    );
+  }
 
   const res = await fetch(`${BASE}${path}`, {
     ...rest,
