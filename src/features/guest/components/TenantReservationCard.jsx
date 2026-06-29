@@ -1,7 +1,16 @@
-import { MapPin, CalendarCheck2, FileText, Key, Calendar, XCircle, CreditCard, Ban, Star } from 'lucide-react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { MapPin, CalendarCheck2, FileText, Key, Calendar, XCircle, CreditCard, Ban, Star, Building2 } from 'lucide-react';
 import IconButton from '../../../components/ui/IconButton';
+import { propertyApi } from '../../../api/propertyApi';
 import { getExtensionStatusLabel, getExtensionStatusClasses, getActiveExtensionRequest } from '../constants/extensionStatus';
 import { isReviewEligibleStatus } from '../constants/reviewEligibility';
+
+const NoPhoto = () => (
+  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#091124] to-slate-800">
+    <Building2 className="w-8 h-8 text-amber-500" />
+  </div>
+);
 
 const TenantReservationCard = ({
   res,
@@ -21,6 +30,18 @@ const TenantReservationCard = ({
   isPayExtensionPending,
 }) => {
   const activeExtension = getActiveExtensionRequest(extensionRequests);
+  const [failedUrls, setFailedUrls] = useState(new Set());
+
+  const { data: photosData } = useQuery({
+    queryKey: ['photos', res.propertyId],
+    queryFn: () => propertyApi.getPhotos(res.propertyId).then((r) => r.data ?? []),
+    enabled: !!res.propertyId,
+  });
+
+  const validPhotos = (photosData ?? []).filter((p) => !failedUrls.has(p.s3Url));
+  const primaryPhoto = validPhotos.find((p) => p.isPrimary) ?? validPhotos[0] ?? null;
+  const photoUrl = primaryPhoto?.s3Url ?? null;
+  const handleImgError = (url) => setFailedUrls((prev) => new Set([...prev, url]));
 
   const getStatusLabelAndColors = (status) => {
     switch (status) {
@@ -54,11 +75,16 @@ const TenantReservationCard = ({
   return (
     <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 grid grid-cols-1 md:grid-cols-[220px_1fr] lg:grid-cols-[240px_1fr]">
       <div className="relative h-48 md:h-full w-full bg-slate-100 min-h-[160px]">
-        <img
-          src={res.propertyCoverPhoto || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80'}
-          alt={res.propertyTitle}
-          className="w-full h-full object-cover"
-        />
+        {photoUrl ? (
+          <img
+            src={photoUrl}
+            alt={res.propertyTitle}
+            className="w-full h-full object-cover"
+            onError={() => handleImgError(photoUrl)}
+          />
+        ) : (
+          <NoPhoto />
+        )}
         <span className={`absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5 shadow-sm ${statusMeta.bg}`}>
           <span className={`w-1.5 h-1.5 rounded-full ${statusMeta.dot}`} />
           {statusMeta.label}
