@@ -1,8 +1,6 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { MapPin, BedDouble, Bath, Users, Star, Building2 } from 'lucide-react';
-import { propertyApi } from '../../../api/propertyApi';
+import { usePropertyPrimaryPhoto } from '../hooks/usePropertyPrimaryPhoto';
 
 const NoPhoto = () => (
   <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#091124] to-slate-800">
@@ -16,17 +14,7 @@ const NoPhoto = () => (
 const PropertyCard = ({ property }) => {
   const { id, title, city, country, pricePerNight, bedrooms, bathrooms, maxGuests, averageRating, isAvailable } = property;
 
-  const [failedUrls, setFailedUrls] = useState(new Set());
-
-  const { data: photosData } = useQuery({
-    queryKey: ['photos', id],
-    queryFn: () => propertyApi.getPhotos(id).then((r) => r.data ?? []),
-  });
-
-  const validPhotos = (photosData ?? []).filter((p) => !failedUrls.has(p.s3Url));
-  const primaryPhoto = validPhotos.find((p) => p.isPrimary) ?? validPhotos[0] ?? null;
-  const photoUrl = primaryPhoto?.s3Url ?? null;
-  const handleImgError = (url) => setFailedUrls((prev) => new Set([...prev, url]));
+  const { photoUrl, onError: onPhotoError } = usePropertyPrimaryPhoto(id);
   const price = parseFloat(pricePerNight).toLocaleString('en-US', { minimumFractionDigits: 0 });
   const hasRating = averageRating != null && averageRating > 0;
   const rating = hasRating ? parseFloat(averageRating).toFixed(1) : 'Nuevo';
@@ -42,7 +30,7 @@ const PropertyCard = ({ property }) => {
             src={photoUrl}
             alt={title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            onError={() => handleImgError(photoUrl)}
+            onError={onPhotoError}
           />
         ) : (
           <NoPhoto />

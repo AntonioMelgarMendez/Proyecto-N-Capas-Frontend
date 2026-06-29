@@ -1,8 +1,6 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { MapPin, Star, Pencil, User, Building2, Trash2 } from 'lucide-react';
-import { propertyApi } from '../../../api/propertyApi';
+import { usePropertyPrimaryPhoto } from '../../catalog/hooks/usePropertyPrimaryPhoto';
 
 const NoPhoto = () => (
   <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#091124] to-slate-800">
@@ -26,17 +24,7 @@ const PropertyLandlordCard = ({ property, onDelete }) => {
     occupancy = isAvailable ? 92 : 0
   } = property;
 
-  const [failedUrls, setFailedUrls] = useState(new Set());
-
-  const { data: photosData } = useQuery({
-    queryKey: ['photos', id],
-    queryFn: () => propertyApi.getPhotos(id).then((r) => r.data ?? []),
-  });
-
-  const validPhotos = (photosData ?? []).filter((p) => !failedUrls.has(p.s3Url));
-  const primaryPhoto = validPhotos.find((p) => p.isPrimary) ?? validPhotos[0] ?? null;
-  const photoUrl = primaryPhoto?.s3Url ?? null;
-  const handleImgError = (url) => setFailedUrls((prev) => new Set([...prev, url]));
+  const { photoUrl, onError: onPhotoError } = usePropertyPrimaryPhoto(id);
 
   const pricePerMonth = Math.round(parseFloat(pricePerNight) * 30);
   const formattedPrice = pricePerMonth.toLocaleString('es-ES');
@@ -50,7 +38,7 @@ const PropertyLandlordCard = ({ property, onDelete }) => {
             src={photoUrl}
             alt={title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            onError={() => handleImgError(photoUrl)}
+            onError={onPhotoError}
           />
         ) : (
           <NoPhoto />
